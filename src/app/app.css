@@ -1,0 +1,42 @@
+/* Layout Principal - Ng-Zorro */
+.main-layout {
+  min-height: 100vh;
+}
+
+.header {
+  background: #001529;
+  padding: 0 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.content {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: calc(100vh - 64px);
+}
+
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer {
+  text-align: center;
+  background: #001529;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 16px 50px;
+}

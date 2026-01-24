@@ -1,0 +1,216 @@
+<div class="login-page">
+  <!-- Panel Izquierdo: Imagen de Branding (Solo Desktop) -->
+  <div class="left-panel">
+    <div class="logo-center">
+      <div class="logo-icon-white"></div>
+      <span class="logo-text-white">VERTEX</span>
+    </div>
+  </div>
+
+  <!-- Panel Derecho: Formulario -->
+  <div class="right-panel">
+    <div class="form-container">
+      <!-- Toggle Login/Register -->
+      <div class="mode-toggle">
+        <button
+          type="button"
+          [class.active]="isLoginMode()"
+          (click)="isLoginMode.set(true)">
+          Iniciar Sesión
+        </button>
+        <button
+          type="button"
+          [class.active]="!isLoginMode()"
+          (click)="isLoginMode.set(false)">
+          Registrarse
+        </button>
+      </div>
+
+      <!-- Alerta de Error -->
+      @if (errorMessage()) {
+        <nz-alert
+          nzType="error"
+          [nzMessage]="errorMessage()"
+          nzShowIcon
+          nzCloseable
+          (nzOnClose)="errorMessage.set(null)"
+          class="error-alert"
+        ></nz-alert>
+      }
+
+      <!-- Formulario de Login -->
+      @if (isLoginMode()) {
+        <form nz-form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="auth-form">
+          <!-- Email -->
+          <div class="form-field">
+            <label class="field-label">Correo electrónico</label>
+            <nz-input-group [nzPrefix]="mailIcon" class="input-wrapper" [class.error]="hasError(loginForm, 'email')">
+              <input
+                nz-input
+                type="email"
+                formControlName="email"
+                placeholder="tu.correo@ejemplo.com" />
+            </nz-input-group>
+            @if (hasError(loginForm, 'email')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(loginForm, 'email') }}
+              </div>
+            }
+            <ng-template #mailIcon>
+              <span nz-icon nzType="mail" nzTheme="outline" class="input-icon"></span>
+            </ng-template>
+          </div>
+
+          <!-- Password -->
+          <div class="form-field">
+            <div class="password-header">
+              <label class="field-label">Contraseña</label>
+              <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
+            </div>
+            <nz-input-group [nzPrefix]="lockIcon" class="input-wrapper" [class.error]="hasError(loginForm, 'password')">
+              <input
+                nz-input
+                type="password"
+                formControlName="password"
+                placeholder="Tu contraseña segura" />
+            </nz-input-group>
+            @if (hasError(loginForm, 'password')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(loginForm, 'password') }}
+              </div>
+            }
+            <ng-template #lockIcon>
+              <span nz-icon nzType="lock" nzTheme="outline" class="input-icon"></span>
+            </ng-template>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            nz-button
+            nzType="primary"
+            nzBlock
+            nzSize="large"
+            [nzLoading]="isLoading()"
+            [disabled]="isLoading()"
+            class="submit-button">
+            Continuar
+          </button>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>O CONTINUAR CON GOOGLE</span>
+          </div>
+
+          <!-- Google Button -->
+          <button
+            type="button"
+            nz-button
+            nzBlock
+            nzSize="large"
+            class="google-button">
+            <span nz-icon nzType="google" nzTheme="outline"></span>
+            Continuar con Google
+          </button>
+        </form>
+      }
+
+      <!-- Formulario de Registro -->
+      @if (!isLoginMode()) {
+        <form nz-form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="auth-form">
+          <!-- Nombre Completo -->
+          <div class="form-field">
+            <label class="field-label">Nombre completo</label>
+            <nz-input-group [nzPrefix]="userIcon" class="input-wrapper" [class.error]="hasError(registerForm, 'fullName')">
+              <input
+                nz-input
+                type="text"
+                formControlName="fullName"
+                placeholder="Juan Pérez" />
+            </nz-input-group>
+            @if (hasError(registerForm, 'fullName')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(registerForm, 'fullName') }}
+              </div>
+            }
+            <ng-template #userIcon>
+              <span nz-icon nzType="user" nzTheme="outline" class="input-icon"></span>
+            </ng-template>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field">
+            <label class="field-label">Correo electrónico</label>
+            <nz-input-group [nzPrefix]="mailIconReg" class="input-wrapper" [class.error]="hasError(registerForm, 'email')">
+              <input
+                nz-input
+                type="email"
+                formControlName="email"
+                placeholder="tu.correo@ejemplo.com" />
+            </nz-input-group>
+            @if (hasError(registerForm, 'email')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(registerForm, 'email') }}
+              </div>
+            }
+            <ng-template #mailIconReg>
+              <span nz-icon nzType="mail" nzTheme="outline" class="input-icon"></span>
+            </ng-template>
+          </div>
+
+          <!-- Password -->
+          <div class="form-field">
+            <label class="field-label">Contraseña</label>
+            <nz-input-group [nzPrefix]="lockIconReg" class="input-wrapper" [class.error]="hasError(registerForm, 'password')">
+              <input
+                nz-input
+                type="password"
+                formControlName="password"
+                placeholder="Mínimo 6 caracteres" />
+            </nz-input-group>
+            @if (hasError(registerForm, 'password')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(registerForm, 'password') }}
+              </div>
+            }
+            <ng-template #lockIconReg>
+              <span nz-icon nzType="lock" nzTheme="outline" class="input-icon"></span>
+            </ng-template>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            nz-button
+            nzType="primary"
+            nzBlock
+            nzSize="large"
+            [nzLoading]="isLoading()"
+            [disabled]="isLoading()"
+            class="submit-button">
+            Crear Cuenta
+          </button>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>O CONTINUAR CON GOOGLE</span>
+          </div>
+
+          <!-- Google Button -->
+          <button
+            type="button"
+            nz-button
+            nzBlock
+            nzSize="large"
+            class="google-button">
+            <span nz-icon nzType="google" nzTheme="outline"></span>
+            Continuar con Google
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</div>

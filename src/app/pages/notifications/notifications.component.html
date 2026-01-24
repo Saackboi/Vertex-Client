@@ -1,0 +1,94 @@
+<!-- Header -->
+<header class="notifications-header">
+  <div class="header-container">
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo-icon">
+        <span nz-icon nzType="rocket" nzTheme="outline"></span>
+      </div>
+      <span class="logo-text">VERTEX</span>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-section">
+      <nav class="nav-links">
+        <a (click)="navigateToProfile()">Perfil</a>
+        <a class="active">Notificaciones</a>
+      </nav>
+
+      <div class="action-buttons">
+        <button class="icon-button" (click)="toggleDarkMode()">
+          <span nz-icon [nzType]="isDarkMode() ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </button>
+        <button class="icon-button">
+          <nz-badge [nzCount]="getUnreadCount()">
+            <span nz-icon nzType="bell" nzTheme="outline"></span>
+          </nz-badge>
+        </button>
+        <nz-avatar nzIcon="user" [nzSize]="32"></nz-avatar>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="notifications-main">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-button" (click)="goBack()">
+        <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
+      </button>
+      <h1 class="page-title">Notificaciones</h1>
+    </div>
+    @if (getUnreadCount() > 0) {
+      <div class="unread-badge">
+        {{ getUnreadCount() }} sin leer
+      </div>
+    }
+  </div>
+
+  <!-- Notifications List -->
+  <div class="notifications-container">
+    @if (notifications().length === 0) {
+      <div class="empty-state">
+        <span nz-icon nzType="bell" nzTheme="outline"></span>
+        <h3>No hay notificaciones</h3>
+        <p>Cuando tengas notificaciones, aparecerán aquí</p>
+      </div>
+    } @else {
+      @for (notification of notifications(); track notification.id) {
+        <div [class]="'notification-card ' + (notification.read ? 'read' : 'unread')">
+          <div class="notification-icon" [class]="notification.type">
+            @if (notification.type === 'success') {
+              <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+            } @else if (notification.type === 'warning') {
+              <span nz-icon nzType="exclamation-circle" nzTheme="outline"></span>
+            } @else if (notification.type === 'error') {
+              <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+            } @else {
+              <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+            }
+          </div>
+
+          <div class="notification-content">
+            <h3 class="notification-title">{{ notification.title }}</h3>
+            <p class="notification-message">{{ notification.message }}</p>
+            <span class="notification-time">{{ notification.timestamp }}</span>
+          </div>
+
+          <div class="notification-actions">
+            @if (!notification.read) {
+              <button class="action-button mark-read" (click)="markAsRead(notification.id)">
+                <span nz-icon nzType="check" nzTheme="outline"></span>
+              </button>
+            }
+            <button class="action-button delete" (click)="deleteNotification(notification.id)">
+              <span nz-icon nzType="delete" nzTheme="outline"></span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</main>

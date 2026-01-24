@@ -1,0 +1,512 @@
+<!-- Header -->
+<header class="onboarding-header">
+  <div class="header-container">
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo-icon">
+        <span nz-icon nzType="rocket" nzTheme="outline"></span>
+      </div>
+      <span class="logo-text">VERTEX</span>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-section">
+      <nav class="nav-links">
+        <a (click)="navigateToProfile()">Perfil</a>
+        <a (click)="navigateToNotifications()">Notificaciones</a>
+      </nav>
+
+      <div class="action-buttons">
+        <button class="icon-button" (click)="toggleDarkMode()">
+          <span nz-icon [nzType]="isDarkMode() ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </button>
+        <button class="icon-button" (click)="navigateToNotifications()">
+          <nz-badge [nzCount]="notificationCount()">
+            <span nz-icon nzType="bell" nzTheme="outline"></span>
+          </nz-badge>
+        </button>
+        <nz-avatar nzIcon="user" [nzSize]="32"></nz-avatar>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="onboarding-main">
+  <!-- Alerta de Onboarding Completado -->
+  @if (isCompleted()) {
+    <div class="completed-alert-container">
+      <nz-alert
+        nzType="success"
+        nzShowIcon
+        class="completed-alert"
+      >
+        <div class="alert-content">
+          <div class="alert-icon-large">
+            <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+          </div>
+          <div class="alert-text">
+            <h2 class="alert-title">¡Perfil Completado!</h2>
+            <p class="alert-description">
+              Ya has finalizado la configuración de tu perfil profesional. 
+              No puedes volver a crear un nuevo perfil desde aquí.
+            </p>
+            <p class="alert-description">
+              Si necesitas editar tu información, dirígete a tu página de perfil.
+            </p>
+          </div>
+        </div>
+        <div class="alert-actions">
+          <button nz-button nzType="primary" nzSize="large" (click)="navigateToProfile()">
+            <span nz-icon nzType="user" nzTheme="outline"></span>
+            Ir a Mi Perfil
+          </button>
+          <button nz-button nzType="default" nzSize="large" (click)="navigateToDashboard()">
+            <span nz-icon nzType="home" nzTheme="outline"></span>
+            Ir al Dashboard
+          </button>
+        </div>
+      </nz-alert>
+    </div>
+  }
+
+  <!-- Page Header -->
+  <div class="page-header" [class.hidden]="isCompleted()">
+    <div class="page-title-section">
+      <h1 class="page-title">Configuración de Cuenta</h1>
+      @if (isCompleted()) {
+        <span class="completed-badge">
+          <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+          Completado
+        </span>
+      }
+    </div>
+    @if (lastSaved() && !isCompleted()) {
+      <div class="autosave-badge">
+        <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+        <span class="badge-text">Borrador guardado automáticamente {{ lastSaved() }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper-container" [class.hidden]="isCompleted()">
+    <div class="stepper">
+      <!-- Step 1 -->
+      <div class="step-wrapper">
+        <div [class]="currentStep() > 0 ? 'step-circle completed' : (currentStep() === 0 ? 'step-circle active' : 'step-circle')">
+          @if (currentStep() > 0) {
+            <span nz-icon nzType="check" nzTheme="outline"></span>
+          } @else {
+            1
+          }
+        </div>
+        <span [class]="currentStep() > 0 ? 'step-label completed' : (currentStep() === 0 ? 'step-label active' : 'step-label')">Cuenta</span>
+      </div>
+
+      <div [class]="currentStep() > 0 ? 'step-line completed' : 'step-line'"></div>
+
+      <!-- Step 2 -->
+      <div class="step-wrapper">
+        <div [class]="currentStep() > 1 ? 'step-circle completed' : (currentStep() === 1 ? 'step-circle active' : 'step-circle')">
+          @if (currentStep() > 1) {
+            <span nz-icon nzType="check" nzTheme="outline"></span>
+          } @else {
+            2
+          }
+        </div>
+        <span [class]="currentStep() > 1 ? 'step-label completed' : (currentStep() === 1 ? 'step-label active' : 'step-label')">Experiencia</span>
+      </div>
+
+      <div [class]="currentStep() > 1 ? 'step-line completed' : 'step-line'"></div>
+
+      <!-- Step 3 -->
+      <div class="step-wrapper">
+        <div [class]="currentStep() === 2 ? 'step-circle active' : 'step-circle'">3</div>
+        <span [class]="currentStep() === 2 ? 'step-label active' : 'step-label'">Revisión</span>
+      </div>
+    </div>
+    <p class="step-indicator">Paso {{ currentStep() + 1 }} de 3</p>
+  </div>
+
+  <!-- Formularios de Onboarding -->
+  <div [class.hidden]="isCompleted()">
+    <!-- Form Card -->
+    @if (currentStep() === 0) {
+      <div class="form-card">
+      <h2 class="form-title">Información Personal</h2>
+      
+      <!-- Alerta de ayuda -->
+      <nz-alert
+        nzType="info"
+        nzMessage="Completa tu perfil profesional"
+        nzDescription="Esta información ayudará a los reclutadores a conocerte mejor. Sé claro y conciso."
+        nzShowIcon
+        nzCloseable
+        style="margin-bottom: 1.5rem;"
+      ></nz-alert>
+
+      <form [formGroup]="accountForm" class="account-form">
+        <!-- Row 1: Nombre Completo -->
+        <div class="form-field">
+          <label for="fullName" class="field-label">Nombre de perfil</label>
+          <input
+            id="fullName"
+            type="text"
+            class="field-input disabled"
+            formControlName="fullName"
+            placeholder="Tu nombre"
+            readonly
+          />
+          <span class="field-hint">Este dato proviene de tu nombre de cuenta</span>
+        </div>
+
+        <!-- Row 2: Título Profesional -->
+        <div class="form-field">
+          <label for="jobTitle" class="field-label">Título Profesional <span class="required">*</span></label>
+          <input
+            id="jobTitle"
+            type="text"
+            class="field-input"
+            [class.error]="hasError(accountForm, 'jobTitle')"
+            formControlName="jobTitle"
+            placeholder="Ingeniera de Software Senior"
+          />
+          @if (hasError(accountForm, 'jobTitle')) {
+            <div class="error-message">
+              <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+              {{ getErrorMessage(accountForm, 'jobTitle') }}
+            </div>
+          }
+        </div>
+
+        <!-- Row 3: Resumen Profesional -->
+        <div class="form-field">
+          <label for="summary" class="field-label">Resumen Profesional <span class="required">*</span></label>
+          <textarea
+            id="summary"
+            class="field-textarea"
+            [class.error]="hasError(accountForm, 'summary')"
+            formControlName="summary"
+            placeholder="Cuéntanos un poco sobre tu trayectoria y lo que buscas..."
+            rows="4"
+          ></textarea>
+          <div class="field-footer">
+            @if (hasError(accountForm, 'summary')) {
+              <div class="error-message">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(accountForm, 'summary') }}
+              </div>
+            }
+            <span class="char-count" [class.warning]="(accountForm.get('summary')?.value?.length || 0) < 50">
+              {{ accountForm.get('summary')?.value?.length || 0 }} / 500 caracteres
+              @if ((accountForm.get('summary')?.value?.length || 0) < 50) {
+                <span class="min-chars">(mínimo 50)</span>
+              }
+            </span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="button" class="submit-button" (click)="saveAndContinue()" [disabled]="isLoading()">
+            Guardar y Siguiente
+            <span nz-icon nzType="arrow-right" nzTheme="outline"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Paso 2: Experiencia -->
+  @if (currentStep() === 1) {
+    <div class="step-container">
+      <!-- Experiencias Laborales -->
+      <h2 class="step-section-title">Experiencia Laboral</h2>
+      
+      <!-- Alerta de ayuda -->
+      <nz-alert
+        nzType="info"
+        nzMessage="Agrega tu experiencia profesional"
+        nzDescription="Incluye al menos una experiencia laboral. Sé específico con tus responsabilidades y logros."
+        nzShowIcon
+        nzCloseable
+        style="margin-bottom: 1.5rem;"
+      ></nz-alert>
+
+      <form [formGroup]="experienceForm">
+        <div formArrayName="experiences" class="experiences-list">
+          @for (exp of experiences.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="experience-card">
+              <div class="experience-indicator"></div>
+              
+              <div class="experience-content">
+                <div class="experience-fields">
+                  <div class="field-row">
+                    <div class="form-field">
+                      <label class="field-label">Título del Puesto <span class="required">*</span></label>
+                      <input 
+                        type="text" 
+                        formControlName="jobTitle" 
+                        class="field-input" 
+                        [class.error]="hasExperienceError(i, 'jobTitle')"
+                        placeholder="Ingeniero de Software Senior" />
+                      @if (hasExperienceError(i, 'jobTitle')) {
+                        <div class="error-message-inline">
+                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                          {{ getExperienceErrorMessage(i, 'jobTitle') }}
+                        </div>
+                      }
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Empresa <span class="required">*</span></label>
+                      <input 
+                        type="text" 
+                        formControlName="company" 
+                        class="field-input" 
+                        [class.error]="hasExperienceError(i, 'company')"
+                        placeholder="Tech Solutions Inc." />
+                      @if (hasExperienceError(i, 'company')) {
+                        <div class="error-message-inline">
+                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                          {{ getExperienceErrorMessage(i, 'company') }}
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="field-row date-row">
+                    <div class="form-field">
+                      <label class="field-label">Fecha de Inicio <span class="required">*</span></label>
+                      <input 
+                        type="month" 
+                        formControlName="startDate" 
+                        class="field-input"
+                        [class.error]="hasExperienceError(i, 'startDate')" />
+                      @if (hasExperienceError(i, 'startDate')) {
+                        <div class="error-message-inline">
+                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                          {{ getExperienceErrorMessage(i, 'startDate') }}
+                        </div>
+                      }
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">Fecha de Fin</label>
+                      <input 
+                        type="month" 
+                        formControlName="endDate" 
+                        class="field-input" 
+                        [disabled]="exp.get('isCurrent')?.value" />
+                    </div>
+                  </div>
+
+                  <div class="checkbox-field">
+                    <label class="checkbox-label">
+                      <input type="checkbox" formControlName="isCurrent" class="field-checkbox" />
+                      <span>Trabajo actual</span>
+                    </label>
+                  </div>
+
+                  <div class="form-field">
+                    <label class="field-label">Descripción <span class="required">*</span></label>
+                    <textarea 
+                      formControlName="description" 
+                      class="field-textarea" 
+                      [class.error]="hasExperienceError(i, 'description')"
+                      rows="3" 
+                      placeholder="Describe tus responsabilidades y logros..."></textarea>
+                    <div class="field-footer">
+                      @if (hasExperienceError(i, 'description')) {
+                        <div class="error-message-inline">
+                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                          {{ getExperienceErrorMessage(i, 'description') }}
+                        </div>
+                      }
+                      <span class="char-count-small">
+                        {{ exp.get('description')?.value?.length || 0 }} / 500
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="experience-actions">
+                  <button type="button" class="action-button delete" (click)="removeExperience(i)">
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <button type="button" class="add-button" (click)="addExperience()">
+          <span nz-icon nzType="plus" nzTheme="outline"></span>
+          Agregar experiencia
+        </button>
+      </form>
+
+      <!-- Habilidades -->
+      <h2 class="step-section-title">Habilidades</h2>
+      
+      <div class="skills-card">
+        <div class="skill-input-wrapper">
+          <span nz-icon nzType="search" nzTheme="outline" class="search-icon"></span>
+          <input 
+            type="text" 
+            class="skill-input" 
+            placeholder="Añade una habilidad y presiona Enter"
+            (keydown)="addSkill($event)"
+          />
+        </div>
+
+        <div class="skills-list">
+          @for (skill of skills(); track skill) {
+            <span class="skill-tag">
+              {{ skill }}
+              <button type="button" class="skill-remove" (click)="removeSkill(skill)">
+                <span nz-icon nzType="close" nzTheme="outline"></span>
+              </button>
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="form-navigation">
+        <button type="button" class="nav-button secondary" (click)="previousStep()">
+          Atrás
+        </button>
+        <button type="button" class="nav-button primary" (click)="saveAndContinue()" [disabled]="isLoading()">
+          Guardar y Siguiente
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Paso 3: Revisión -->
+  @if (currentStep() === 2) {
+    <div class="review-container">
+      <div class="review-grid">
+        <!-- Columna izquierda: CV Preview -->
+        <div class="cv-preview">
+          <div class="cv-header">
+            <h2 class="cv-title">Resumen de tu Perfil</h2>
+            <p class="cv-subtitle">Vista previa de tu información profesional</p>
+          </div>
+
+          <div class="cv-content">
+            <!-- Información Personal -->
+            <section class="cv-section">
+              <h3 class="cv-section-title">INFORMACIÓN PERSONAL</h3>
+              <div class="cv-info-grid">
+                <div class="cv-info-item">
+                  <p class="cv-info-label">Nombre Completo</p>
+                  <p class="cv-info-value">{{ accountForm.get('fullName')?.value }}</p>
+                </div>
+                <div class="cv-info-item">
+                  <p class="cv-info-label">Título Profesional</p>
+                  <p class="cv-info-value">{{ accountForm.get('jobTitle')?.value }}</p>
+                </div>
+              </div>
+              <div class="cv-summary">
+                <p class="cv-info-label">Resumen Profesional</p>
+                <p class="cv-info-value">{{ accountForm.get('summary')?.value }}</p>
+              </div>
+            </section>
+
+            <!-- Experiencia Laboral -->
+            <section class="cv-section">
+              <h3 class="cv-section-title">EXPERIENCIA LABORAL</h3>
+              <div class="cv-experience-list">
+                @for (exp of experiences.controls; track $index; let i = $index) {
+                  <div class="cv-experience-item" [class.first]="i === 0">
+                    <div class="cv-exp-header">
+                      <h4 class="cv-exp-title">{{ exp.get('jobTitle')?.value || 'Sin título' }}</h4>
+                      <span class="cv-exp-date">
+                        @if (exp.get('startDate')?.value) {
+                          {{ exp.get('startDate')?.value | date: 'MMM yyyy' }}
+                        } @else {
+                          Fecha inicio
+                        }
+                        -
+                        @if (exp.get('isCurrent')?.value) {
+                          Presente
+                        } @else if (exp.get('endDate')?.value) {
+                          {{ exp.get('endDate')?.value | date: 'MMM yyyy' }}
+                        } @else {
+                          Fecha fin
+                        }
+                      </span>
+                    </div>
+                    <p class="cv-exp-company">{{ exp.get('company')?.value || 'Sin empresa' }}</p>
+                    @if (exp.get('description')?.value) {
+                      <p class="cv-exp-description">{{ exp.get('description')?.value }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Resumen Cards -->
+        <div class="summary-sidebar">
+          <!-- Card: Información Personal -->
+          <div class="summary-card">
+            <h3 class="summary-card-title">Información Personal</h3>
+            <div class="summary-card-content">
+              <div class="summary-item">
+                <span class="summary-label">Nombre:</span>
+                <span class="summary-value">{{ accountForm.get('fullName')?.value }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Título:</span>
+                <span class="summary-value">{{ accountForm.get('jobTitle')?.value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card: Experiencia Laboral -->
+          <div class="summary-card">
+            <h3 class="summary-card-title">Experiencia Laboral</h3>
+            <div class="summary-card-content">
+              @for (exp of experiences.controls; track $index; let i = $index) {
+                <div class="summary-exp-item" [class.last]="$index === experiences.controls.length - 1">
+                  <p class="summary-exp-title">{{ exp.get('jobTitle')?.value }}</p>
+                  <p class="summary-exp-company">{{ exp.get('company')?.value }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Card: Habilidades -->
+          <div class="summary-card">
+            <h3 class="summary-card-title">Habilidades</h3>
+            <div class="summary-skills">
+              @for (skill of skills(); track skill) {
+                <span class="summary-skill-tag">{{ skill }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Botones de navegación -->
+          <div class="review-actions">
+            <button type="button" class="nav-button secondary full-width" (click)="previousStep()">
+              Atrás
+            </button>
+            <button type="button" class="nav-button primary full-width" (click)="finishOnboarding()" [disabled]="isLoading()">
+              Finalizar y Enviar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  </div>
+  <!-- Fin Formularios de Onboarding -->
+
+  <!-- Footer -->
+  <p class="footer-text">© 2024 VERTEX. Todos los derechos reservados.</p>
+</main>
