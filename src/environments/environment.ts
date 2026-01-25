@@ -9,5 +9,6 @@ export const environment = {
   apiUrl: 'https://localhost:7216/api',
   signalRUrl: 'https://localhost:7216/hubs/notifications',
   tokenKey: 'authToken',
-  userKey: 'userInfo'
+  userKey: 'userInfo',
+  enableSignalR: true // Cambiar a false para desactivar SignalR temporalmente
 };

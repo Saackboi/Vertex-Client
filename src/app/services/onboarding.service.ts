@@ -1,13 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import {
+import { catchError, map } from 'rxjs/operators';import { ErrorHandlerService } from '../core/services/error-handler.service';import {
   ApiResponse,
   SaveProgressDto,
   OnboardingStatusDto,
   ProfessionalProfileDto
-} from '../models/api.types';
+} from '../models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -15,6 +14,7 @@ import { environment } from '../../environments/environment';
 })
 export class OnboardingService {
   private http = inject(HttpClient);
+  private errorHandler = inject(ErrorHandlerService);
 
   // URL base del API (desde environment)
   private readonly API_URL = `${environment.apiUrl}/onboarding`;
@@ -30,7 +30,7 @@ export class OnboardingService {
     return this.http.post<ApiResponse<OnboardingStatusDto>>(`${this.API_URL}/save`, dto)
       .pipe(
         map(response => this.handleResponse(response, 'Progreso guardado exitosamente')),
-        catchError(this.handleError)
+        catchError(error => this.handleError(error))
       );
   }
 
@@ -71,7 +71,7 @@ export class OnboardingService {
     return this.http.post<ApiResponse<ProfessionalProfileDto>>(`${this.API_URL}/complete`, {})
       .pipe(
         map(response => this.handleResponse(response, 'Onboarding completado exitosamente')),
-        catchError(this.handleError)
+        catchError(error => this.handleError(error))
       );
   }
 
@@ -91,31 +91,9 @@ export class OnboardingService {
   }
 
   /**
-   * Maneja errores HTTP
+   * Maneja errores HTTP usando el servicio centralizado
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Error desconocido';
-
-    if (error.error instanceof ErrorEvent) {
-      // Error del lado del cliente
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Error del lado del servidor
-      if (error.error && typeof error.error === 'object') {
-        const apiError = error.error as ApiResponse<any>;
-        if (apiError.errors && apiError.errors.length > 0) {
-          errorMessage = apiError.errors.join(', ');
-        } else if (apiError.message) {
-          errorMessage = apiError.message;
-        }
-      } else if (error.status === 404) {
-        errorMessage = 'Recurso no encontrado';
-      } else {
-        errorMessage = `Error ${error.status}: ${error.message}`;
-      }
-    }
-
-    console.error('OnboardingService Error:', errorMessage);
-    return throwError(() => new Error(errorMessage));
+    return this.errorHandler.handleError(error);
   }
 }

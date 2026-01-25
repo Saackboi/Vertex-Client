@@ -8,5 +8,6 @@ export const environment = {
   apiUrl: 'https://api.vertex.com/api',  // Cambiar por URL real
   signalRUrl: 'https://api.vertex.com/hubs/notifications',  // Cambiar por URL real
   tokenKey: 'authToken',
-  userKey: 'userInfo'
+  userKey: 'userInfo',
+  enableSignalR: true // SignalR habilitado en producción
 };

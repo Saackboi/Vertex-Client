@@ -25,3 +25,43 @@ body {
   background-color: #f0f2f5;
 }
 
+:root {
+  --brand-green: #43A047;
+  --brand-green-dark: #2e7d32;
+}
+
+.ant-btn-primary {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: var(--brand-green-dark) !important;
+  border-color: var(--brand-green-dark) !important;
+}
+
+.ant-steps-item-process .ant-steps-item-icon,
+.ant-steps-item-process .ant-steps-item-icon .ant-steps-icon {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+}
+
+.ant-steps-item-process .ant-steps-item-icon .ant-steps-icon {
+  color: #fff !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-checkbox-indeterminate .ant-checkbox-inner {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+}
+
+.ant-radio-checked .ant-radio-inner {
+  border-color: var(--brand-green) !important;
+}
+
+.ant-radio-checked .ant-radio-inner::after {
+  background-color: var(--brand-green) !important;
+}
+

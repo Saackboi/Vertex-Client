@@ -1,31 +1,43 @@
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, Subject } from 'rxjs';
+import { map, takeUntil, startWith } from 'rxjs/operators';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDropdownMenuComponent, NzDropdownDirective } from 'ng-zorro-antd/dropdown';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NavigationUtils } from '../../core/utils/navigation.utils';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { AuthService } from '../../services/auth.service';
-import { SaveProgressDto, OnboardingData as ApiOnboardingData, WorkEntry } from '../../models/api.types';
+import { OnboardingMapper } from './utils/onboarding.mapper';
+import { SaveProgressDto } from '../../models';
 import { noEmojiValidator } from '../../validators/no-emoji.validator';
 import * as OnboardingActions from '../../store/onboarding/onboarding.actions';
+import { selectUserFullName, selectIsAuthenticated } from '../../store/auth/auth.selectors';
 import { 
   selectCurrentStep, 
-  selectOnboardingLoading, 
+  selectOnboardingLoading,
   selectOnboardingSaving,
   selectLastSaved,
-  selectFormData,
-  selectIsCompleted 
+  selectOnboardingData,
+  selectIsCompleted,
+  selectOnboardingError
 } from '../../store/onboarding/onboarding.selectors';
+import { FormUtils } from './helpers/form.utils';
+import { StepNumber } from './types/onboarding.types';
+import { selectUnreadCount } from '../../store/notifications/notifications.selectors';
+import { AppLogoComponent } from '../../components/app-logo.component';
+import { AppFooterComponent } from '../../components/app-footer.component';
 
 @Component({
   selector: 'app-onboarding',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -33,131 +45,182 @@ import {
     NzButtonModule,
     NzBadgeModule,
     NzAvatarModule,
+    NzDropdownMenuComponent,
+    NzDropdownDirective,
+    NzMenuModule,
     NzAlertModule,
-    NzModalModule
+    NzModalModule,
+    AppLogoComponent,
+    AppFooterComponent
   ],
+  providers: [],
   templateUrl: './onboarding.component.html',
   styleUrl: './onboarding.component.css'
 })
-export class OnboardingComponent implements OnInit {
+export class OnboardingComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
-  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly destroy$ = new Subject<void>();
 
-  readonly currentStep = signal(0);
-  readonly isDarkMode = signal(false);
-  readonly lastSaved = signal<string>('');
-  readonly notificationCount = signal(3);
-  readonly isLoading = signal(false);
-  readonly isCompleted = signal(false);
-  readonly skills = signal<string[]>([]);
-  readonly newSkill = signal<string>('');
+  // Observables del Store (para usar con async pipe)
+  readonly currentStep$: Observable<number> = this.store.select(selectCurrentStep);
+  readonly loading$: Observable<boolean> = this.store.select(selectOnboardingLoading);
+  readonly saving$: Observable<boolean> = this.store.select(selectOnboardingSaving);
+  readonly isCompleted$: Observable<boolean> = this.store.select(selectIsCompleted);
+  readonly errorMessage$: Observable<string | null> = this.store.select(selectOnboardingError);
+  readonly onboardingData$: Observable<any> = this.store.select(selectOnboardingData);
+  readonly userFullName$: Observable<string> = this.store.select(selectUserFullName);
+  readonly notificationCount$: Observable<number> = this.store.select(selectUnreadCount).pipe(
+    map(count => count ?? 0),
+    startWith(0)
+  );
+  
+  readonly isLoading$: Observable<boolean> = this.store.select(selectOnboardingLoading);
 
-  private dataLoaded = false;
+  readonly lastSaved$: Observable<string> = this.store.select(selectLastSaved).pipe(
+    map(saved => {
+      if (!saved) return '';
+      const date = new Date(saved);
+      return date.toLocaleString('es-ES', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    })
+  );
 
+  // Estado local
+  isDarkMode = false;
+  skills: string[] = [];
+  resumeData: any = {};
+
+  // Formularios
   accountForm!: FormGroup;
   experienceForm!: FormGroup;
 
   ngOnInit(): void {
-    // Obtener nombre del usuario desde localStorage
-    const userInfo = this.authService.getUserInfo();
-    const fullName = userInfo?.fullName || '';
+    this.initializeForms();
+    this.subscribeToStoreUpdates();
+    this.store.select(selectIsAuthenticated).pipe(takeUntil(this.destroy$)).subscribe(isAuth => {
+      if (isAuth) {
+        this.store.dispatch(OnboardingActions.loadResume());
+      } else {
+        NavigationUtils.goToLogin(this.router);
+      }
+    });
+  }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private initializeForms(): void {
+    // Inicializar formularios
     this.accountForm = this.fb.group({
-      fullName: [{ value: fullName, disabled: true }], // Solo lectura, viene del perfil
-      jobTitle: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), noEmojiValidator()]],
+      fullName: ['', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
       summary: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500), noEmojiValidator()]]
     });
 
     this.experienceForm = this.fb.group({
       experiences: this.fb.array([])
     });
-
-    // Cargar datos existentes primero
-    this.loadExistingData();
-
-    // Subscribe to store state
-    this.store.select(selectCurrentStep).subscribe(step => this.currentStep.set(step));
-    this.store.select(selectOnboardingLoading).subscribe(loading => this.isLoading.set(loading));
-    this.store.select(selectOnboardingSaving).subscribe(saving => this.isLoading.set(saving));
-    this.store.select(selectIsCompleted).subscribe(completed => {
-      this.isCompleted.set(completed);
-    });
-    this.store.select(selectLastSaved).subscribe(saved => {
-      if (saved) {
-        const date = new Date(saved);
-        this.lastSaved.set(date.toLocaleString('es-ES', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }));
-      }
-    });
-
-    // Auto-save cada 30 segundos
-    setInterval(() => {
-      const currentForm = this.getCurrentForm();
-      if (currentForm && currentForm.dirty && currentForm.valid) {
-        this.autoSave();
-      }
-    }, 30000);
   }
 
-  loadExistingData(): void {
-    this.store.dispatch(OnboardingActions.loadResume());
-    
-    this.store.select(selectFormData)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(data => {
-        if (data && !this.dataLoaded) {
-          this.dataLoaded = true;
-          
-          // Rellenar formulario con datos existentes
-          this.accountForm.patchValue({
-            jobTitle: data.summary || '', // Temporal: ajustar cuando exista jobTitle en API
-            summary: data.summary || ''
-          });
-
-          // Limpiar experiencias existentes antes de cargar
-          while (this.experiences.length > 0) {
-            this.experiences.removeAt(0);
-          }
-
-          // Cargar experiencias
-          if (data.experiences && data.experiences.length > 0) {
-            data.experiences.forEach(exp => {
-              const expGroup = this.fb.group({
-                jobTitle: [exp.role || '', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
-                company: [exp.company || '', [Validators.required, Validators.minLength(2), noEmojiValidator()]],
-                startDate: [exp.dateRange?.start || '', [Validators.required]],
-                endDate: [exp.dateRange?.end || ''],
-                isCurrent: [!exp.dateRange?.end || false],
-                description: [exp.description || '', [Validators.required, Validators.minLength(20), Validators.maxLength(500), noEmojiValidator()]]
-              });
-              this.experiences.push(expGroup);
-            });
-          }
-
-          // Cargar habilidades
-          if (data.skills) {
-            this.skills.set(data.skills);
-          }
+  private subscribeToStoreUpdates(): void {
+    // Cargar nombre SIEMPRE desde el usuario autenticado
+    this.userFullName$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(fullName => {
+        if (fullName) {
+          this.accountForm.patchValue({ fullName }, { emitEvent: false });
         }
       });
+
+    this.onboardingData$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(stateData => {
+        const flat = stateData && (stateData as any).data ? (stateData as any).data : (stateData || {});
+        
+        if (!flat || Object.keys(flat).length === 0) {
+          this.resumeData = {};
+          return;
+        }
+
+        const hydrated = OnboardingMapper.toFormData(flat);
+        
+        // Patch formulario base (solo summary, el fullName viene del auth store)
+        this.accountForm.patchValue({
+          summary: hydrated.summary || ''
+        }, { emitEvent: false });
+
+        // Reconstruir FormArray de experiencias
+        this.rebuildFormArrays(hydrated);
+
+        // Actualizar skills
+      if (Array.isArray(hydrated.skills)) {
+        this.skills = hydrated.skills;
+      }
+
+      this.resumeData = hydrated;
+    });
+
+    // Mostrar mensajes de error
+    this.errorMessage$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(error => {
+        if (error) {
+          this.message.error(error, { nzDuration: 5000 });
+        }
+      });
+  }
+
+  /**
+   * Reconstruye el FormArray de experiencias desde datos hidratados
+   */
+  private rebuildFormArrays(formData: any): void {
+    // Limpiar experiencias existentes
+    while (this.experiences.length > 0) {
+      this.experiences.removeAt(0);
+    }
+
+    if (Array.isArray(formData.experiences)) {
+      formData.experiences.forEach((exp: any, index: number) => {
+        const expGroup = this.fb.group({
+          jobTitle: [exp.jobTitle || '', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
+          company: [exp.company || '', [Validators.required, Validators.minLength(2), noEmojiValidator()]],
+          startDate: [exp.startDate || null, [Validators.required]],
+          endDate: [exp.endDate || null],
+          isCurrent: [!!exp.isCurrent],
+          description: [exp.description || '', [Validators.required, Validators.minLength(20), Validators.maxLength(500), noEmojiValidator()]]
+        });
+        
+        this.configureEndDateControl(expGroup);
+        if (exp.isCurrent) {
+          expGroup.get('endDate')?.disable({ emitEvent: false });
+        }
+        this.experiences.push(expGroup);
+      });
+    }
   }
 
   get experiences(): FormArray {
     return this.experienceForm.get('experiences') as FormArray;
   }
 
-  getCurrentForm(): FormGroup {
-    return this.currentStep() === 0 ? this.accountForm : this.experienceForm;
+  get canFinishOnboarding(): boolean {
+    const data = this.resumeData;
+    const hasIdentity = !!data.fullName;
+    const hasExperiences = Array.isArray(data.experiences) && data.experiences.length > 0;
+    const hasSkills = Array.isArray(data.skills) && data.skills.length > 0;
+    const hasContent = hasExperiences || hasSkills;
+    return hasIdentity && hasContent;
+  }
+
+  getCurrentForm(currentStep: number): FormGroup {
+    return currentStep === 0 ? this.accountForm : this.experienceForm;
   }
 
   addExperience(): void {
@@ -169,13 +232,29 @@ export class OnboardingComponent implements OnInit {
       isCurrent: [false],
       description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500), noEmojiValidator()]]
     });
+
+    this.configureEndDateControl(experienceGroup);
     this.experiences.push(experienceGroup);
     this.message.success('¡Experiencia agregada!');
   }
 
-  removeExperience(index: number): void {
-    this.experiences.removeAt(index);
-    this.message.info('Experiencia eliminada');
+  private configureEndDateControl(group: FormGroup): void {
+    const isCurrentControl = group.get('isCurrent');
+    const endDateControl = group.get('endDate');
+    if (!isCurrentControl || !endDateControl) return;
+
+    if (isCurrentControl.value) {
+      endDateControl.disable({ emitEvent: false });
+    }
+
+    isCurrentControl.valueChanges.subscribe(isCurrent => {
+      if (isCurrent) {
+        endDateControl.disable({ emitEvent: false });
+        endDateControl.setValue(null);
+      } else {
+        endDateControl.enable({ emitEvent: false });
+      }
+    });
   }
 
   addSkill(event: KeyboardEvent): void {
@@ -188,17 +267,17 @@ export class OnboardingComponent implements OnInit {
         event.preventDefault();
         return;
       }
-      if (this.skills().includes(skill)) {
+      if (this.skills.includes(skill)) {
         this.message.warning('Esta habilidad ya fue agregada');
         event.preventDefault();
         return;
       }
-      if (this.skills().length >= 20) {
+      if (this.skills.length >= 20) {
         this.message.warning('Máximo 20 habilidades permitidas');
         event.preventDefault();
         return;
       }
-      this.skills.update(skills => [...skills, skill]);
+      this.skills = [...this.skills, skill];
       input.value = '';
       this.message.success(`¡Habilidad "${skill}" agregada!`);
       event.preventDefault();
@@ -206,91 +285,75 @@ export class OnboardingComponent implements OnInit {
   }
 
   removeSkill(skill: string): void {
-    this.skills.update(skills => skills.filter(s => s !== skill));
+    this.skills = this.skills.filter(s => s !== skill);
   }
 
-  previousStep(): void {
-    if (this.currentStep() > 0) {
-      // Guardar progreso antes de retroceder para no perder datos
-      const currentForm = this.getCurrentForm();
-      if (currentForm.dirty) {
-        this.autoSave();
-      }
-      this.store.dispatch(OnboardingActions.updateCurrentStep({ step: this.currentStep() - 1 }));
+  removeExperience(index: number): void {
+    if (index >= 0 && index < this.experiences.length) {
+      this.experiences.removeAt(index);
+      this.message.success('Experiencia eliminada');
     }
   }
 
-  toggleDarkMode(): void {
-    this.isDarkMode.update(v => !v);
-    document.documentElement.classList.toggle('dark');
-  }
-
-  navigateToProfile(): void {
-    this.router.navigate(['/profile']);
-  }
-
-  navigateToNotifications(): void {
-    this.router.navigate(['/notifications']);
-  }
-
-  navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
-  autoSave(): void {
-    const currentForm = this.getCurrentForm();
-    if (currentForm.invalid) return;
-
-    const userInfo = this.authService.getUserInfo();
-    const formData = this.accountForm.getRawValue();
-    const experiencesData: WorkEntry[] = this.experiences.controls.map(control => {
-      const val = control.value;
-      return {
-        company: val.company || '',
-        role: val.jobTitle || '',
-        description: val.description || '',
-        dateRange: {
-          start: val.startDate || '',
-          end: val.isCurrent ? null : (val.endDate || null)
-        }
-      };
-    });
-
-    const dto: SaveProgressDto = {
-      currentStep: this.currentStep(),
-      isCompleted: false,
-      data: {
-        fullName: userInfo?.fullName || formData.fullName,
-        email: userInfo?.email || '',
-        summary: formData.summary || '',
-        skills: this.skills(),
-        experiences: experiencesData,
-        educations: []
-      }
-    };
-
-    this.store.dispatch(OnboardingActions.saveProgress({ dto }));
-  }
-
-  saveAndContinue(): void {
-    const currentForm = this.getCurrentForm();
-    if (currentForm.invalid) {
-      Object.values(currentForm.controls).forEach(control => {
-        if (control instanceof FormArray) {
-          control.controls.forEach(c => {
-            const group = c as FormGroup;
-            Object.values(group.controls).forEach((field: AbstractControl) => field.markAsTouched());
-          });
-        } else {
-          control.markAsTouched();
-        }
+  /**
+   * 🔥 NAVEGACIÓN REACTIVA: Despacha acción con payload limpio
+   * Delega toda la transformación al Mapper (SoC)
+   * IMPORTANTE: Backend espera currentStep 1-indexed (1, 2, 3)
+   */
+  private async handleNavigation(direction: 'next' | 'back'): Promise<void> {
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[Onboarding] handleNavigation - direction:', direction);
+      
+      // Obtener currentStep del observable
+      const currentFrontendStep = await new Promise<number>(resolve => {
+        this.currentStep$.pipe(takeUntil(this.destroy$)).subscribe(s => resolve(s));
       });
+      
+      // Frontend usa 0-indexed (0, 1, 2), Backend usa 1-indexed (1, 2, 3)
+      const targetFrontendStep = direction === 'next' 
+        ? Math.min(currentFrontendStep + 1, 2)  // Max step 2 (0-indexed)
+        : Math.max(currentFrontendStep - 1, 0);  // Min step 0 (0-indexed)
+      
+      const targetBackendStep = targetFrontendStep + 1; // Convertir a 1-indexed para backend
+
+      const formData = this.accountForm.getRawValue();
+
+      // ✅ Toda la transformación se hace en el Mapper
+      const dto: SaveProgressDto = OnboardingMapper.toSaveDto(
+        formData,
+        this.experiences.controls,
+        this.skills,
+        targetBackendStep  // Enviar 1, 2, o 3 al backend
+      );
+
+      // Añadir isCompleted si es el último paso (paso 3 en backend = índice 2 frontend)
+      dto.isCompleted = (targetFrontendStep === 2);
+
+      this.store.dispatch(OnboardingActions.saveProgress({ dto }));
+    } catch (error) {
+      this.message.error('Error al navegar: ' + (error as Error).message);
+    }
+  }
+
+  previousStep(): void {
+    this.handleNavigation('back');
+  }
+
+  async saveAndContinue(): Promise<void> {
+    const currentStep = await new Promise<number>(resolve => {
+      this.currentStep$.pipe(takeUntil(this.destroy$)).subscribe(s => resolve(s));
+    });
+    
+    const currentForm = this.getCurrentForm(currentStep);
+    if (currentForm.invalid) {
+      FormUtils.markFormDirty(currentForm);
       this.message.warning('Por favor completa todos los campos requeridos correctamente');
       return;
     }
 
-    // Validaciones adicionales por step
-    if (this.currentStep() === 0) {
+    // Validaciones por step
+    if (currentStep === 0) {
       const summary = this.accountForm.get('summary')?.value || '';
       if (summary.length < 50) {
         this.message.warning('El resumen profesional debe tener al menos 50 caracteres');
@@ -298,52 +361,18 @@ export class OnboardingComponent implements OnInit {
       }
     }
 
-    if (this.currentStep() === 1) {
+    if (currentStep === 1) {
       if (this.experiences.length === 0) {
         this.message.warning('Agrega al menos una experiencia laboral');
         return;
       }
-      if (this.skills().length === 0) {
+      if (this.skills.length === 0) {
         this.message.warning('Agrega al menos una habilidad');
         return;
       }
     }
 
-    const userInfo = this.authService.getUserInfo();
-    const formData = this.accountForm.getRawValue();
-    const experiencesData: WorkEntry[] = this.experiences.controls.map(control => {
-      const val = control.value;
-      return {
-        company: val.company || '',
-        role: val.jobTitle || '',
-        description: val.description || '',
-        dateRange: {
-          start: val.startDate || '',
-          end: val.isCurrent ? null : (val.endDate || null)
-        }
-      };
-    });
-
-    const dto: SaveProgressDto = {
-      currentStep: this.currentStep() + 1,
-      isCompleted: false,
-      data: {
-        fullName: userInfo?.fullName || formData.fullName,
-        email: userInfo?.email || '',
-        summary: formData.summary || '',
-        skills: this.skills(),
-        experiences: experiencesData,
-        educations: []
-      }
-    };
-
-    this.store.dispatch(OnboardingActions.saveProgress({ dto }));
-    this.message.success('Progreso guardado exitosamente');
-    
-    // Actualizar el step después de guardar
-    if (this.currentStep() < 2) {
-      this.store.dispatch(OnboardingActions.updateCurrentStep({ step: this.currentStep() + 1 }));
-    }
+    this.handleNavigation('next');
   }
 
   finishOnboarding(): void {
@@ -358,9 +387,27 @@ export class OnboardingComponent implements OnInit {
     });
   }
 
-  /**
-   * Obtiene el mensaje de error para un campo específico
-   */
+  toggleDarkMode(): void {
+    this.isDarkMode = !this.isDarkMode;
+    document.documentElement.classList.toggle('dark');
+  }
+
+  navigateToNotifications(): void {
+    NavigationUtils.goToNotifications(this.router);
+  }
+
+  navigateToDashboard(): void {
+    NavigationUtils.goToDashboard(this.router);
+  }
+
+  logout(): void {
+    NavigationUtils.logout(this.router, this.store);
+  }
+
+  clearError(): void {
+    this.store.dispatch(OnboardingActions.clearError());
+  }
+
   getErrorMessage(formGroup: FormGroup, fieldName: string): string {
     const control = formGroup.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
@@ -380,25 +427,16 @@ export class OnboardingComponent implements OnInit {
     return 'Campo inválido';
   }
 
-  /**
-   * Verifica si un campo tiene error y ha sido tocado
-   */
   hasError(formGroup: FormGroup, fieldName: string): boolean {
     const control = formGroup.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
-  /**
-   * Verifica si un control de experiencia tiene error
-   */
   hasExperienceError(index: number, fieldName: string): boolean {
     const control = this.experiences.at(index).get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
-  /**
-   * Obtiene mensaje de error para campo de experiencia
-   */
   getExperienceErrorMessage(index: number, fieldName: string): string {
     const control = this.experiences.at(index).get(fieldName);
     if (!control || !control.errors || !control.touched) return '';

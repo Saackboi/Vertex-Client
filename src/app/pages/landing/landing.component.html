@@ -1,12 +1,7 @@
 <header class="header">
   <nav class="nav-container">
     <div class="nav-left">
-      <div class="logo">
-        <div class="logo-icon">
-          <span nz-icon nzType="rocket" nzTheme="outline"></span>
-        </div>
-        <span class="logo-text">VERTEX</span>
-      </div>
+      <app-logo route="/" />
       <div class="nav-links">
         <a class="nav-link active" href="#">Inicio</a>
         <a class="nav-link" href="#caracteristicas">Características</a>
@@ -14,9 +9,36 @@
       </div>
     </div>
     <div class="nav-right">
-      <button nz-button nzType="default" class="login-button" (click)="goToLogin()">
-        Iniciar Sesión
-      </button>
+      @if (isAuthenticated$ | async) {
+        <button nz-button nzType="primary" class="dashboard-button" (click)="goToOnboarding()">
+          Ir a mi Perfil
+        </button>
+        <nz-avatar 
+          nz-dropdown 
+          [nzDropdownMenu]="userMenu" 
+          nzPlacement="bottomRight"
+          nzIcon="user" 
+          [nzSize]="32"
+          class="user-avatar">
+        </nz-avatar>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item>
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              {{ userFullName$ | async }}
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Cerrar Sesión
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      } @else {
+        <button nz-button nzType="default" class="login-button" (click)="goToLogin()">
+          Iniciar Sesión
+        </button>
+      }
     </div>
   </nav>
 </header>
@@ -31,12 +53,26 @@
         Crea, gestiona y optimiza tu currículum y perfil profesional con herramientas inteligentes que te abren puertas.
       </p>
       <div class="hero-actions">
-        <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToLogin()">
-          Crear mi Perfil Gratis
-        </button>
-        <button nz-button nzType="default" nzSize="large" class="cta-secondary" (click)="goToLogin()">
-          Iniciar Sesión
-        </button>
+        @if (isAuthenticated$ | async) {
+          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToOnboarding()">
+            @if (isCompleted$ | async) {
+              Ver perfil
+            } @else {
+              @if (onboardingInProgress$ | async) {
+                Continuar creación de perfil
+              } @else {
+                Crear mi Perfil Gratis
+              }
+            }
+          </button>
+        } @else {
+          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToLogin()">
+            Crear mi Perfil Gratis
+          </button>
+          <button nz-button nzType="default" nzSize="large" class="cta-secondary" (click)="goToLogin()">
+            Iniciar Sesión
+          </button>
+        }
       </div>
       <div class="hero-image">
         <div class="image-glow"></div>
@@ -101,63 +137,59 @@
       </div>
     </div>
   </section>
+<!-- Footer global -->
+<app-footer />
+
+  <section class="features-section" id="caracteristicas">
+    <div class="features-container">
+      <div class="section-header">
+        <h2 class="section-title">Características que te Impulsan</h2>
+        <div class="title-underline"></div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span nz-icon nzType="save" nzTheme="outline"></span>
+          </div>
+          <h3 class="feature-title">Auto-Guardado Inteligente</h3>
+          <p class="feature-description">
+            Nunca pierdas tu progreso. VERTEX guarda automáticamente cada cambio mientras trabajas, para que siempre estés al día.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span nz-icon nzType="layout" nzTheme="outline"></span>
+          </div>
+          <h3 class="feature-title">Formato Profesional</h3>
+          <p class="feature-description">
+            Accede a plantillas de diseño impecables que garantizan una presentación pulcra y moderna de tu experiencia.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <span nz-icon nzType="safety" nzTheme="outline"></span>
+          </div>
+          <h3 class="feature-title">Seguridad Garantizada</h3>
+          <p class="feature-description">
+            Tus datos están seguros con nosotros. Implementamos las mejores prácticas de seguridad para proteger tu información.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-container">
+      <div class="cta-card">
+        <div class="cta-glow"></div>
+        <h2 class="cta-title">¿Listo para transformar tu carrera profesional?</h2>
+        <p class="cta-subtitle">Únete a miles de profesionales que ya están usando Vertex para encontrar mejores oportunidades.</p>
+        <button nz-button nzType="default" nzSize="large" class="cta-button" (click)="goToLogin()">
+          Empieza hoy mismo
+        </button>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer class="footer">
-  <div class="footer-container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="logo">
-          <div class="logo-icon">
-            <span nz-icon nzType="rocket" nzTheme="outline"></span>
-          </div>
-          <span class="logo-text">VERTEX</span>
-        </div>
-        <p class="footer-description">
-          Vertex - Smart Resume Tracker. La plataforma líder en gestión de perfiles profesionales asistida por inteligencia artificial.
-        </p>
-        <div class="social-links">
-          <a class="social-link" href="#">
-            <span nz-icon nzType="global" nzTheme="outline"></span>
-          </a>
-          <a class="social-link" href="#">
-            <span nz-icon nzType="team" nzTheme="outline"></span>
-          </a>
-          <a class="social-link" href="#">
-            <span nz-icon nzType="bell" nzTheme="outline"></span>
-          </a>
-        </div>
-      </div>
-      <div class="footer-links-group">
-        <h4 class="footer-links-title">Producto</h4>
-        <ul class="footer-links">
-          <li><a href="#">Características</a></li>
-          <li><a href="#">Precios</a></li>
-          <li><a href="#">Integraciones</a></li>
-        </ul>
-      </div>
-      <div class="footer-links-group">
-        <h4 class="footer-links-title">Soporte</h4>
-        <ul class="footer-links">
-          <li><a href="#">Ayuda</a></li>
-          <li><a href="#">Tutoriales</a></li>
-          <li><a href="#">Contacto</a></li>
-        </ul>
-      </div>
-      <div class="footer-links-group">
-        <h4 class="footer-links-title">Legal</h4>
-        <ul class="footer-links">
-          <li><a href="#">Privacidad</a></li>
-          <li><a href="#">Términos</a></li>
-          <li><a href="#">Cookies</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2024 VERTEX. Todos los derechos reservados.</p>
-      <div class="footer-credits">
-        <a href="#">Hecho con ❤️ en Madrid</a>
-      </div>
-    </div>
-  </div>
-</footer>
+<app-footer />

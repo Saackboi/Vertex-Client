@@ -4,11 +4,14 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzConfig } from 'ng-zorro-antd/core/config';
+
 import { es_ES, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 
+// Iconos registrados (centralizados)
+// Core iconos globales (mínimos)
 // Import iconos específicos que vamos a usar
 import {
   MenuFoldOutline,
@@ -17,6 +20,7 @@ import {
   LockOutline,
   MailOutline,
   CheckCircleOutline,
+  CheckCircleFill,
   HomeOutline,
   LogoutOutline,
   RocketOutline,
@@ -36,15 +40,25 @@ import {
   ExclamationCircleOutline,
   CloseCircleOutline,
   CheckOutline,
-  DeleteOutline
+  DeleteOutline,
+  PlusOutline,
+  IdcardOutline,
+  SolutionOutline,
+  TagsOutline,
+  EditOutline,
+  CalendarOutline,
+  ExclamationCircleFill
 } from '@ant-design/icons-angular/icons';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { authReducer } from './store/auth/auth.reducer';
 import { onboardingReducer } from './store/onboarding/onboarding.reducer';
+import { notificationsReducer } from './store/notifications/notifications.reducer';
 import { AuthEffects } from './store/auth/auth.effects';
 import { OnboardingEffects } from './store/onboarding/onboarding.effects';
+import { NotificationsEffects } from './store/notifications/notifications.effects';
+import { OnboardingGlobalEffects } from './store/onboarding/onboarding.global.effects';
 
 const icons = [
   MenuFoldOutline,
@@ -53,6 +67,7 @@ const icons = [
   LockOutline,
   MailOutline,
   CheckCircleOutline,
+  CheckCircleFill,
   HomeOutline,
   LogoutOutline,
   RocketOutline,
@@ -72,9 +87,15 @@ const icons = [
   ExclamationCircleOutline,
   CloseCircleOutline,
   CheckOutline,
-  DeleteOutline
+  DeleteOutline,
+  PlusOutline,
+  IdcardOutline,
+  SolutionOutline,
+  TagsOutline,
+  EditOutline,
+  CalendarOutline,
+  ExclamationCircleFill
 ];
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -86,14 +107,15 @@ export const appConfig: ApplicationConfig = {
     provideNzI18n(es_ES),
     provideNzConfig({
       theme: {
-        primaryColor: '#1890ff'
+        primaryColor: '#43A047'
       }
     }),
     provideStore({
       auth: authReducer,
-      onboarding: onboardingReducer
+      onboarding: onboardingReducer,
+      notifications: notificationsReducer
     }),
-    provideEffects([AuthEffects, OnboardingEffects]),
+    provideEffects([AuthEffects, OnboardingEffects, NotificationsEffects, OnboardingGlobalEffects]),
     provideStoreDevtools({
       maxAge: 25,
       logOnly: !isDevMode(),

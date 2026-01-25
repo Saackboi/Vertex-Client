@@ -1,7 +1,6 @@
-import { Component, signal, inject, DestroyRef, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
+import { Component, signal, inject, effect, computed } from '@angular/core';
 import { Router } from '@angular/router';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -9,11 +8,13 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { finalize } from 'rxjs/operators';
-import { LoginDto, RegisterDto } from '../../models/api.types';
+import { LoginDto, RegisterDto } from '../../models';
 import { noEmojiValidator } from '../../validators/no-emoji.validator';
+import { strongPasswordValidator } from '../../validators/password.validator';
 import * as AuthActions from '../../store/auth/auth.actions';
 import { selectAuthLoading, selectAuthError, selectIsAuthenticated } from '../../store/auth/auth.selectors';
+import { NavigationUtils } from '../../core/utils/navigation.utils';
+
 
 @Component({
   selector: 'app-login',
@@ -26,60 +27,68 @@ import { selectAuthLoading, selectAuthError, selectIsAuthenticated } from '../..
     NzAlertModule,
     NzIconModule
   ],
+  providers: [],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
-  // Servicios inyectados
+export class LoginComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly store = inject(Store);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly message = inject(NzMessageService);
+  private readonly router = inject(Router);
 
-  // Estado con Signals
+  // 🔥 ESTRICTO: Signals derivadas ÚNICAMENTE del Store
+  readonly isLoading = this.store.selectSignal(selectAuthLoading);
+  readonly errorMessage = this.store.selectSignal(selectAuthError);
+  readonly isAuthenticated = this.store.selectSignal(selectIsAuthenticated);
+
+  // Signal local de UI (no viene del Store)
   readonly isLoginMode = signal(true); // true = Login, false = Register
-
-  // Selectors del store
-  readonly isLoading = signal(false);
-  readonly errorMessage = signal<string | null>(null);
 
   // Formulario de Login
   readonly loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6), strongPasswordValidator()]]
   });
 
   // Formulario de Registro
   readonly registerForm = this.fb.group({
     fullName: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), noEmojiValidator()]],
     email: ['', [Validators.required, Validators.email, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)]],
-    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(50)]]
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(50), strongPasswordValidator()]]
   });
 
-  ngOnInit(): void {
-    // Subscribe to store state
-    this.store.select(selectAuthLoading)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(loading => this.isLoading.set(loading));
+  constructor() {
+    // 🔥 EFFECT: Mostrar notificación de error cuando hay error
+    effect(() => {
+      const error = this.errorMessage();
+      if (error) {
+        this.message.error(error, { nzDuration: 5000 });
+      }
+    });
 
-    this.store.select(selectAuthError)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(error => {
-        this.errorMessage.set(error);
-        if (error) {
-          this.message.error(error, { nzDuration: 5000 });
-        }
-      });
+    // 🔥 EFFECT: Mostrar notificación de éxito SOLO cuando se autentica
+    // Debe validar que está autenticado Y no en modo loading
+    effect(() => {
+      const isAuth = this.isAuthenticated();
+      const isLoading = this.isLoading();
+      // Solo mostrar si está autenticado y NO está cargando (significa que acaba de terminar)
+      if (isAuth && !isLoading) {
+        const mode = this.isLoginMode() ? 'Inicio de sesión' : 'Registro';
+        this.message.success(`${mode} exitoso. Redirigiendo...`, { nzDuration: 2000 });
+      }
+    });
 
-    // Mostrar notificación de éxito cuando se autentica
-    this.store.select(selectIsAuthenticated)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(isAuth => {
-        if (isAuth) {
-          const mode = this.isLoginMode() ? 'Inicio de sesión' : 'Registro';
-          this.message.success(`${mode} exitoso. Redirigiendo...`, { nzDuration: 2000 });
-        }
-      });
+    // 🔒 Redirigir automáticamente si ya está autenticado
+    effect(() => {
+      if (this.isAuthenticated()) {
+        NavigationUtils.goToOnboarding(this.router);
+      }
+    });
+  }
+
+  clearError(): void {
+    this.store.dispatch(AuthActions.clearError());
   }
 
   /**
@@ -93,7 +102,7 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Maneja el submit del formulario de Login
+   * 🔥 SUBMIT REACTIVO: Despacha acción sin suscribirse
    */
   onLoginSubmit(): void {
     if (!this.loginForm.valid) {
@@ -107,7 +116,7 @@ export class LoginComponent implements OnInit {
   }
 
   /**
-   * Maneja el submit del formulario de Registro
+   * 🔥 SUBMIT REACTIVO: Despacha acción sin suscribirse
    */
   onRegisterSubmit(): void {
     if (!this.registerForm.valid) {
@@ -148,6 +157,10 @@ export class LoginComponent implements OnInit {
       const max = control.errors['maxlength'].requiredLength;
       return `Máximo ${max} caracteres`;
     }
+    if (control.errors['strongPassword']) {
+      return 'La contraseña debe incluir: mayúscula, minúscula y número';
+    }
+    if (control.errors['noEmoji']) return 'No se permiten emojis en este campo';
     return 'Campo inválido';
   }
 

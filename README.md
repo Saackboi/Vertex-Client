@@ -1,64 +1,56 @@
-# 🚀 VertexClient - Angular 21 + Ng-Zorro
+# Vertex Client - Angular Application
 
-Cliente web profesional construido con **Angular v21** y **Ng-Zorro (Ant Design)** para el sistema VertexClient.
+## 🎯 Arquitectura NgRx Reactiva Estricta
 
-## 📋 Características
+Este proyecto implementa una arquitectura **100% reactiva** usando NgRx con **Separación de Responsabilidades (SoC)** completa.
 
-- ✅ **Angular 21** (Standalone Components, Signals)
-- ✅ **Ng-Zorro** (Ant Design para Angular)
-- ✅ **Arquitectura Moderna:** Functional Guards, HTTP Interceptors
-- ✅ **Formularios Reactivos** con validación
-- ✅ **Autenticación** con JWT y guards
-- ✅ **Onboarding Multi-Paso** con `nz-steps`
-- ✅ **UI/UX Profesional** con componentes de Ng-Zorro
-- ✅ **Integración API** estricta según contratos backend
+### 📋 Principios Clave
 
-## 🎯 Páginas Implementadas
+```
+Componentes → Solo UI + dispatch(actions)
+Store → Única fuente de verdad
+Effects → Lógica asíncrona (HTTP, side effects)
+Mappers → Transformación de datos
+Services → Solo llamadas HTTP (usados por Effects)
+```
 
-### 1. Landing Page (`/`)
-Página de bienvenida con diseño moderno y CTA para comenzar.
-
-### 2. Login (`/login`)
-Sistema de autenticación con:
-- Formulario reactivo con validación
-- Integración con API: `POST /api/auth/login`
-- Manejo de errores y estados de carga
-- Almacenamiento de token JWT
-
-### 3. Onboarding (`/onboarding`)
-Proceso de onboarding en 3 pasos:
-- **Paso 1:** Información Personal
-- **Paso 2:** Información Profesional  
-- **Paso 3:** Preferencias
-
-Características:
-- Navegación con `nz-steps`
-- Guardado automático del progreso
-- Carga de estado previo desde API
-- Pantalla de éxito al completar
-
-## 🏗️ Arquitectura
+### 🏗️ Estructura
 
 ```
 src/app/
-├── guards/
-│   └── auth.guard.ts           # Guard para rutas protegidas
-├── interceptors/
-│   └── auth.interceptor.ts     # Interceptor HTTP para token
 ├── pages/
-│   ├── landing/                # Página de inicio
-│   ├── login/                  # Página de login
-│   └── onboarding/             # Proceso de onboarding
-├── app.config.ts               # Configuración global
-├── app.routes.ts               # Definición de rutas
-└── app.ts                      # Componente raíz con layout
+│   ├── onboarding/         # Wizard de 3 pasos
+│   │   ├── utils/
+│   │   │   └── onboarding.mapper.ts    ✅ Transformaciones centralizadas
+│   │   ├── onboarding.component.ts     ✅ 100% reactivo (sin servicios HTTP)
+│   │   └── onboarding.component.html
+│   └── login/              # Login/Register
+│       ├── login.component.ts          ✅ 100% reactivo
+│       └── login.component.html
+├── store/
+│   ├── auth/               # Estado de autenticación
+│   │   ├── auth.actions.ts
+│   │   ├── auth.effects.ts             ✅ Coordina HTTP + Router
+│   │   ├── auth.reducer.ts
+│   │   └── auth.selectors.ts
+│   └── onboarding/         # Estado de onboarding
+│       ├── onboarding.actions.ts
+│       ├── onboarding.effects.ts       ✅ Coordina HTTP + navegación
+│       ├── onboarding.reducer.ts
+│       └── onboarding.selectors.ts
+├── services/
+│   ├── auth.service.ts                 ✅ Solo HTTP (login, register)
+│   └── onboarding.service.ts           ✅ Solo HTTP (save, load)
+├── guards/
+│   ├── auth.guard.ts                   ✅ Protección de rutas
+│   └── onboarding.guard.ts
+└── interceptors/
+    └── auth.interceptor.ts             ✅ Token JWT automático
 ```
 
-## 🚀 Instalación y Uso
+---
 
-### Prerrequisitos
-- Node.js 18+
-- npm 9+
+## 🚀 Inicio Rápido
 
 ### Instalación
 ```bash
@@ -68,130 +60,184 @@ npm install
 ### Desarrollo
 ```bash
 npm start
+# Servidor en http://localhost:4200
 ```
-La aplicación estará disponible en `http://localhost:4200`
 
-**Nota:** El proxy está configurado para redirigir `/api` a `http://localhost:3000`
-
-### Build de Producción
+### Build Producción
 ```bash
 npm run build
 ```
 
-### Testing
+### Tests
 ```bash
 npm test
 ```
 
-## 🔧 Configuración
+---
 
-### Proxy (proxy.conf.json)
-El proyecto incluye configuración de proxy para desarrollo:
-```json
-{
-  "/api": {
-    "target": "http://localhost:3000",
-    "secure": false
-  }
-}
-```
+## 🔍 Componentes Reactivos
 
-### Interceptor HTTP
-El interceptor `authInterceptor` agrega automáticamente el token a todas las peticiones a `/api`:
-```typescript
-Authorization: Bearer <TOKEN>
-```
+### **OnboardingComponent**
+✅ **NO inyecta** `OnboardingService`  
+✅ **NO transforma** datos (usa `OnboardingMapper`)  
+✅ **Solo despacha** acciones al Store  
+✅ **Signals readonly** del Store  
 
-### Guard de Autenticación
-El `authGuard` protege rutas que requieren autenticación verificando el token en `localStorage`.
-
-## 📡 Integración API
-
-### Contratos Implementados
-
-#### Auth
-```typescript
-POST /api/auth/login
-Body: { email: string, password: string }
-Response: { token: string }
-```
-
-#### Onboarding
-```typescript
-GET /api/onboarding/resume
-Headers: Authorization: Bearer <TOKEN>
-Response: {
-  currentStep: number,
-  serializedData: string,
-  isCompleted: boolean
-}
-
-POST /api/onboarding/save
-Headers: Authorization: Bearer <TOKEN>
-Body: {
-  currentStep: number,
-  serializedData: string  // JSON.stringify(data)
-}
-```
-
-**⚠️ Importante:** `serializedData` debe ser un **string**, no un objeto plano.
-
-## 🎨 Componentes Ng-Zorro Usados
-
-- `nz-layout` - Layout principal
-- `nz-header` / `nz-footer` - Header y footer
-- `nz-steps` - Navegación por pasos
-- `nz-form` - Formularios reactivos
-- `nz-input` - Campos de entrada
-- `nz-button` - Botones
-- `nz-card` - Tarjetas
-- `nz-grid` - Sistema de grid
-- `nz-select` - Selectores dropdown
-- `nz-result` - Pantallas de resultado
-- `nz-alert` - Alertas
-- `nz-icon` - Iconos
-- `nz-message` - Notificaciones toast
-
-## 📚 Documentación Adicional
-
-Para más detalles sobre la implementación, consulta:
-- [SETUP_GUIDE.md](SETUP_GUIDE.md) - Guía completa de configuración
-
-## 🛠️ Stack Tecnológico
-
-- **Angular:** 21.1.0
-- **Ng-Zorro:** 19.x.x
-- **TypeScript:** 5.9.2
-- **RxJS:** 7.8.0
-- **Vitest:** 4.0.8
-
-## 📝 Scripts Disponibles
-
-| Script | Descripción |
-|--------|-------------|
-| `npm start` | Inicia servidor de desarrollo con proxy |
-| `npm run build` | Genera build de producción |
-| `npm test` | Ejecuta tests unitarios |
-| `npm run watch` | Build en modo watch |
-
-## 🔐 Autenticación
-
-El sistema usa JWT almacenado en `localStorage`:
-- **Key:** `authToken`
-- **Header HTTP:** `Authorization: Bearer <TOKEN>`
-- **Guard:** `authGuard` protege `/onboarding`
-
-## 🌐 Navegación
-
-- `/` - Landing page (público)
-- `/login` - Login (público)
-- `/onboarding` - Onboarding (protegido)
-
-## 📄 Licencia
-
-Proyecto privado - VertexClient ©2026
+### **LoginComponent**
+✅ **NO inyecta** `AuthService`  
+✅ **Solo despacha** acciones de login/register  
+✅ **Signals readonly** del Store  
 
 ---
 
-**Desarrollado con:** Angular 21 + Ng-Zorro + TypeScript  
-**Arquitectura:** Standalone Components + Signals + Functional Guards
+## 📊 Flujo de Datos
+
+### Ejemplo: Guardar progreso de onboarding
+
+```
+Usuario hace clic en "Continuar"
+  ↓
+OnboardingComponent.saveAndContinue()
+  ↓
+handleNavigation('next')
+  ↓
+OnboardingMapper.toSaveDto(formValue, ...) 🔧 Transforma datos
+  ↓
+store.dispatch(OnboardingActions.saveProgress({ dto }))
+  ↓
+onboarding.effects.ts → saveProgress$ 🌐 HTTP POST
+  ↓
+API responde 200 OK
+  ↓
+Effect despacha saveProgressSuccess({ currentStep })
+  ↓
+Reducer actualiza state.onboarding.currentStep
+  ↓
+Selector selectCurrentStep emite nuevo valor
+  ↓
+Component signal se actualiza automáticamente ⚡
+  ↓
+Template re-renderiza con nuevo paso
+```
+
+---
+
+## 🧩 Mapper Pattern
+
+### **OnboardingMapper** (`utils/onboarding.mapper.ts`)
+
+#### `toFormData(input: any): any`
+Hidrata formularios desde API/Store:
+- Parsea JSON si es string
+- Normaliza `experience` → `experiences`
+- Convierte ISO strings → Date objects
+- Infiere `isCurrent: true` si `endDate` es null
+
+#### `toSaveDto(...): SaveProgressDto`
+Construye payload para API:
+- Convierte Date objects → ISO strings
+- Mapea FormArray → WorkEntry[]
+- Limpia strings (trim)
+- Estructura `dateRange: { start, end }`
+
+---
+
+## 🔐 Autenticación
+
+### Flow Login
+```
+LoginComponent.onLoginSubmit()
+  ↓
+store.dispatch(AuthActions.login({ credentials }))
+  ↓
+auth.effects.ts → login$ → POST /auth/login
+  ↓
+Response: { token, user }
+  ↓
+Token guardado en localStorage
+  ↓
+AuthInterceptor inyecta Bearer token en todas las requests
+  ↓
+Router navega a /onboarding
+```
+
+### AuthGuard
+Protege rutas verificando `selectIsAuthenticated`:
+```typescript
+// app.routes.ts
+{
+  path: 'onboarding',
+  component: OnboardingComponent,
+  canActivate: [AuthGuard] // ✅ Solo autenticados
+}
+```
+
+---
+
+## 📖 Documentación Completa
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Arquitectura detallada con diagramas
+- **[SERVICES_DOCUMENTATION.md](./SERVICES_DOCUMENTATION.md)** - API de servicios
+- **[CONFIGURATION_SUMMARY.md](./CONFIGURATION_SUMMARY.md)** - Configuración del proyecto
+- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Guía de instalación y desarrollo
+
+---
+
+## ✅ Checklist de Calidad
+
+| Criterio | Estado |
+|----------|--------|
+| Componentes sin servicios HTTP | ✅ 100% |
+| Transformaciones en Mappers | ✅ 100% |
+| Effects en constructor | ✅ 100% |
+| Signals readonly del Store | ✅ 100% |
+| Guards para rutas protegidas | ✅ 100% |
+| Interceptor para JWT | ✅ 100% |
+
+---
+
+## 🛠️ Stack Tecnológico
+
+- **Angular 21** - Framework
+- **NgRx** - State Management
+- **Ng-Zorro** - UI Components
+- **TypeScript** - Lenguaje
+- **RxJS** - Reactive Programming
+- **Signals** - Reactive Primitives
+
+---
+
+## 📝 Scripts NPM
+
+```json
+{
+  "start": "ng serve",
+  "build": "ng build",
+  "test": "ng test",
+  "lint": "ng lint"
+}
+```
+
+---
+
+## 🚨 Anti-patrones PROHIBIDOS
+
+```typescript
+// ❌ NUNCA: Inyectar servicios HTTP en componentes
+private service = inject(OnboardingService);
+
+// ❌ NUNCA: Transformar datos en componentes
+const iso = date.toISOString(); // Usar Mapper
+
+// ❌ NUNCA: Llamar servicios directamente
+this.authService.login(...).subscribe(...);
+
+// ✅ CORRECTO: Despachar acciones
+this.store.dispatch(AuthActions.login({ credentials }));
+```
+
+---
+
+## 📄 Licencia
+
+MIT

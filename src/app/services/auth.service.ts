@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { ErrorHandlerService } from '../core/services/error-handler.service';
 import { Router } from '@angular/router';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -9,7 +10,7 @@ import {
   LoginDto,
   AuthResponseDto,
   UserInfo
-} from '../models/api.types';
+} from '../models';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -18,6 +19,7 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private errorHandler = inject(ErrorHandlerService);
 
   // URL base del API (desde environment)
   private readonly API_URL = `${environment.apiUrl}/auth`;
@@ -46,7 +48,7 @@ export class AuthService {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.API_URL}/register`, dto)
       .pipe(
         map(response => this.handleAuthResponse(response)),
-        catchError(this.handleError)
+        catchError(error => this.handleError(error))
       );
   }
 
@@ -58,7 +60,7 @@ export class AuthService {
     return this.http.post<ApiResponse<AuthResponseDto>>(`${this.API_URL}/login`, dto)
       .pipe(
         map(response => this.handleAuthResponse(response)),
-        catchError(this.handleError)
+        catchError(error => this.handleError(error))
       );
   }
 
@@ -71,7 +73,7 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.isAuthenticated.set(false);
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    // Navegación controlada por el efecto de NgRx, no forzar recarga
   }
 
   /**
@@ -156,30 +158,10 @@ export class AuthService {
   }
 
   /**
-   * Maneja errores HTTP
+   * Maneja errores HTTP usando el servicio centralizado
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
-    let errorMessage = 'Error desconocido';
-
-    if (error.error instanceof ErrorEvent) {
-      // Error del lado del cliente
-      errorMessage = `Error: ${error.error.message}`;
-    } else {
-      // Error del lado del servidor
-      if (error.error && typeof error.error === 'object') {
-        const apiError = error.error as ApiResponse<any>;
-        if (apiError.errors && apiError.errors.length > 0) {
-          errorMessage = apiError.errors.join(', ');
-        } else if (apiError.message) {
-          errorMessage = apiError.message;
-        }
-      } else {
-        errorMessage = `Error ${error.status}: ${error.message}`;
-      }
-    }
-
-    console.error('AuthService Error:', errorMessage);
-    return throwError(() => new Error(errorMessage));
+    return this.errorHandler.handleError(error);
   }
 
   /**

@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
-import { OnboardingStatusDto } from '../../models/api.types';
+import { OnboardingStatusDto } from '../../models';
 import * as OnboardingActions from './onboarding.actions';
+import * as AuthActions from '../auth/auth.actions';
 
 export interface OnboardingState {
   currentStep: number;
@@ -35,7 +36,7 @@ export const onboardingReducer = createReducer(
   on(OnboardingActions.loadResumeSuccess, (state, { data }) => ({
     ...state,
     data,
-    currentStep: Math.min(data.currentStep, 2),
+    currentStep: Math.max(Math.min(data.currentStep - 1, 2), 0), // Convertir de 1-indexed (backend) a 0-indexed (frontend)
     isCompleted: data.isCompleted,
     lastSaved: data.updatedAt,
     loading: false,
@@ -47,7 +48,8 @@ export const onboardingReducer = createReducer(
     loading: false,
     isCompleted: false,
     currentStep: 0,
-    error
+    data: null,
+    error: null // No mostrar error si es usuario nuevo (404)
   })),
 
   // Save Progress
@@ -60,7 +62,7 @@ export const onboardingReducer = createReducer(
   on(OnboardingActions.saveProgressSuccess, (state, { data }) => ({
     ...state,
     data,
-    currentStep: Math.min(data.currentStep, 2),
+    currentStep: Math.max(Math.min(data.currentStep - 1, 2), 0), // Convertir de 1-indexed (backend) a 0-indexed (frontend)
     lastSaved: data.updatedAt,
     saving: false,
     error: null
@@ -105,5 +107,12 @@ export const onboardingReducer = createReducer(
   })),
 
   // Reset
-  on(OnboardingActions.resetOnboarding, () => initialState)
+  on(OnboardingActions.resetOnboarding, () => initialState),
+
+  // Reset onboarding cuando hay login/register exitoso (nuevo usuario)
+  on(AuthActions.loginSuccess, () => initialState),
+  on(AuthActions.registerSuccess, () => initialState),
+  
+  // Reset onboarding cuando hay logout
+  on(AuthActions.logoutSuccess, () => initialState)
 );

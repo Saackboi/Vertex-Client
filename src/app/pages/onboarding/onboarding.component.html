@@ -1,31 +1,46 @@
+
 <!-- Header -->
 <header class="onboarding-header">
   <div class="header-container">
     <!-- Logo -->
-    <div class="logo-section">
-      <div class="logo-icon">
-        <span nz-icon nzType="rocket" nzTheme="outline"></span>
-      </div>
-      <span class="logo-text">VERTEX</span>
-    </div>
+    <app-logo route="/dashboard" />
 
     <!-- Navigation -->
     <div class="nav-section">
       <nav class="nav-links">
-        <a (click)="navigateToProfile()">Perfil</a>
         <a (click)="navigateToNotifications()">Notificaciones</a>
       </nav>
 
       <div class="action-buttons">
         <button class="icon-button" (click)="toggleDarkMode()">
-          <span nz-icon [nzType]="isDarkMode() ? 'sun' : 'moon'" nzTheme="outline"></span>
+          <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
         </button>
         <button class="icon-button" (click)="navigateToNotifications()">
-          <nz-badge [nzCount]="notificationCount()">
+          <nz-badge [nzCount]="(notificationCount$ | async) ?? 0">
             <span nz-icon nzType="bell" nzTheme="outline"></span>
           </nz-badge>
         </button>
-        <nz-avatar nzIcon="user" [nzSize]="32"></nz-avatar>
+        <nz-avatar 
+          nz-dropdown 
+          [nzDropdownMenu]="userMenu" 
+          nzPlacement="bottomRight"
+          nzIcon="user" 
+          [nzSize]="32"
+          class="user-avatar">
+        </nz-avatar>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item>
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              {{ userFullName$ | async }}
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Cerrar Sesión
+            </li>
+          </ul>
+        </nz-dropdown-menu>
       </div>
     </div>
   </div>
@@ -33,106 +48,187 @@
 
 <!-- Main Content -->
 <main class="onboarding-main">
-  <!-- Alerta de Onboarding Completado -->
-  @if (isCompleted()) {
-    <div class="completed-alert-container">
+  <!-- Alerta de Error -->
+  @if ((errorMessage$ | async)) {
+    <div class="error-alert-container">
       <nz-alert
-        nzType="success"
+        nzType="error"
+        [nzMessage]="(errorMessage$ | async)"
         nzShowIcon
-        class="completed-alert"
-      >
-        <div class="alert-content">
-          <div class="alert-icon-large">
-            <span nz-icon nzType="check-circle" nzTheme="fill"></span>
-          </div>
-          <div class="alert-text">
-            <h2 class="alert-title">¡Perfil Completado!</h2>
-            <p class="alert-description">
-              Ya has finalizado la configuración de tu perfil profesional. 
-              No puedes volver a crear un nuevo perfil desde aquí.
-            </p>
-            <p class="alert-description">
-              Si necesitas editar tu información, dirígete a tu página de perfil.
-            </p>
-          </div>
+        nzCloseable
+        (nzOnClose)="clearError()"
+        class="error-alert"
+      ></nz-alert>
+    </div>
+  }
+
+  <!-- Alerta de Onboarding Completado -->
+  @if ((isCompleted$ | async)) {
+    <div class="completed-container">
+      <!-- Hero Section -->
+      <div class="completed-hero">
+        <div class="hero-icon">
+          <span nz-icon nzType="check-circle" nzTheme="fill"></span>
         </div>
-        <div class="alert-actions">
-          <button nz-button nzType="primary" nzSize="large" (click)="navigateToProfile()">
+        <h1 class="hero-title">¡Perfil Completado!</h1>
+        <p class="hero-description">
+          Tu perfil profesional está listo y visible para reclutadores.
+        </p>
+      </div>
+
+      <!-- Profile Summary Card -->
+      <div class="profile-summary-card">
+        <div class="summary-header">
+          <h2 class="summary-title">
             <span nz-icon nzType="user" nzTheme="outline"></span>
-            Ir a Mi Perfil
-          </button>
-          <button nz-button nzType="default" nzSize="large" (click)="navigateToDashboard()">
+            Resumen de tu Perfil
+          </h2>
+        </div>
+
+        <div class="summary-content">
+          <!-- Información Personal -->
+          <div class="info-section">
+            <h3 class="section-label">
+              <span nz-icon nzType="idcard" nzTheme="outline"></span>
+              Información Personal
+            </h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{ accountForm.get('fullName')?.value || 'No especificado' }}</span>
+              </div>
+              <div class="info-item full-width">
+                <span class="info-label">Resumen Profesional:</span>
+                <p class="info-value summary-text">{{ accountForm.get('summary')?.value || 'No especificado' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experiencia -->
+          @if (experiences.length > 0) {
+            <div class="info-section">
+              <h3 class="section-label">
+                <span nz-icon nzType="solution" nzTheme="outline"></span>
+                Experiencia Laboral ({{ experiences.length }})
+              </h3>
+              <div class="experience-list">
+                @for (exp of experiences.controls; track $index) {
+                  <div class="experience-item">
+                    <div class="exp-header">
+                      <span class="exp-role">{{ exp.get('jobTitle')?.value }}</span>
+                      <span class="exp-company">{{ exp.get('company')?.value }}</span>
+                    </div>
+                    <div class="exp-dates">
+                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                      {{ exp.get('startDate')?.value || 'Fecha no especificada' }}
+                      -
+                      {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fecha no especificada') }}
+                    </div>
+                    @if (exp.get('description')?.value) {
+                      <p class="exp-description">{{ exp.get('description')?.value }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Habilidades -->
+          @if (skills && skills.length > 0) {
+            <div class="info-section">
+              <h3 class="section-label">
+                <span nz-icon nzType="tags" nzTheme="outline"></span>
+                Habilidades ({{ skills.length }})
+              </h3>
+              <div class="skills-tags">
+                @for (skill of skills; track skill) {
+                  <span class="skill-tag">{{ skill }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="summary-actions">
+          <button nz-button nzType="primary" nzSize="large" (click)="navigateToDashboard()">
             <span nz-icon nzType="home" nzTheme="outline"></span>
             Ir al Dashboard
           </button>
         </div>
-      </nz-alert>
+      </div>
+
+      <!-- Info Footer -->
+      <div class="info-footer">
+        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+        <p>¿Necesitas hacer cambios? Puedes editar tu perfil en cualquier momento desde la sección de <strong>Perfil</strong>.</p>
+      </div>
     </div>
   }
 
   <!-- Page Header -->
-  <div class="page-header" [class.hidden]="isCompleted()">
+  <div class="page-header" [class.hidden]="(isCompleted$ | async)">
     <div class="page-title-section">
       <h1 class="page-title">Configuración de Cuenta</h1>
-      @if (isCompleted()) {
+      @if ((isCompleted$ | async)) {
         <span class="completed-badge">
           <span nz-icon nzType="check-circle" nzTheme="fill"></span>
           Completado
         </span>
       }
     </div>
-    @if (lastSaved() && !isCompleted()) {
+    @if ((lastSaved$ | async) && !(isCompleted$ | async)) {
       <div class="autosave-badge">
         <span nz-icon nzType="check-circle" nzTheme="outline"></span>
-        <span class="badge-text">Borrador guardado automáticamente {{ lastSaved() }}</span>
+        <span class="badge-text">Borrador guardado automáticamente {{ (lastSaved$ | async) }}</span>
       </div>
     }
   </div>
 
   <!-- Stepper -->
-  <div class="stepper-container" [class.hidden]="isCompleted()">
+  <div class="stepper-container" [class.hidden]="(isCompleted$ | async)">
     <div class="stepper">
       <!-- Step 1 -->
       <div class="step-wrapper">
-        <div [class]="currentStep() > 0 ? 'step-circle completed' : (currentStep() === 0 ? 'step-circle active' : 'step-circle')">
-          @if (currentStep() > 0) {
+        <div [class]="(currentStep$ | async)! > 0 ? 'step-circle completed' : ((currentStep$ | async)! === 0 ? 'step-circle active' : 'step-circle')">
+          @if ((currentStep$ | async)! > 0) {
             <span nz-icon nzType="check" nzTheme="outline"></span>
           } @else {
             1
           }
         </div>
-        <span [class]="currentStep() > 0 ? 'step-label completed' : (currentStep() === 0 ? 'step-label active' : 'step-label')">Cuenta</span>
+        <span [class]="(currentStep$ | async)! > 0 ? 'step-label completed' : ((currentStep$ | async)! === 0 ? 'step-label active' : 'step-label')">Cuenta</span>
       </div>
 
-      <div [class]="currentStep() > 0 ? 'step-line completed' : 'step-line'"></div>
+      <div [class]="(currentStep$ | async)! > 0 ? 'step-line completed' : 'step-line'"></div>
 
       <!-- Step 2 -->
       <div class="step-wrapper">
-        <div [class]="currentStep() > 1 ? 'step-circle completed' : (currentStep() === 1 ? 'step-circle active' : 'step-circle')">
-          @if (currentStep() > 1) {
+        <div [class]="(currentStep$ | async)! > 1 ? 'step-circle completed' : ((currentStep$ | async)! === 1 ? 'step-circle active' : 'step-circle')">
+          @if ((currentStep$ | async)! > 1) {
             <span nz-icon nzType="check" nzTheme="outline"></span>
           } @else {
             2
           }
         </div>
-        <span [class]="currentStep() > 1 ? 'step-label completed' : (currentStep() === 1 ? 'step-label active' : 'step-label')">Experiencia</span>
+        <span [class]="(currentStep$ | async)! > 1 ? 'step-label completed' : ((currentStep$ | async)! === 1 ? 'step-label active' : 'step-label')">Experiencia</span>
       </div>
 
-      <div [class]="currentStep() > 1 ? 'step-line completed' : 'step-line'"></div>
+      <div [class]="(currentStep$ | async)! > 1 ? 'step-line completed' : 'step-line'"></div>
 
       <!-- Step 3 -->
       <div class="step-wrapper">
-        <div [class]="currentStep() === 2 ? 'step-circle active' : 'step-circle'">3</div>
-        <span [class]="currentStep() === 2 ? 'step-label active' : 'step-label'">Revisión</span>
+        <div [class]="(currentStep$ | async)! === 2 ? 'step-circle active' : 'step-circle'">3</div>
+        <span [class]="(currentStep$ | async)! === 2 ? 'step-label active' : 'step-label'">Revisión</span>
       </div>
     </div>
-    <p class="step-indicator">Paso {{ currentStep() + 1 }} de 3</p>
+    <p class="step-indicator">Paso {{ (currentStep$ | async)! + 1 }} de 3</p>
   </div>
 
   <!-- Formularios de Onboarding -->
-  <div [class.hidden]="isCompleted()">
+  <div [class.hidden]="(isCompleted$ | async)">
     <!-- Form Card -->
-    @if (currentStep() === 0) {
+    @if ((currentStep$ | async)! === 0) {
       <div class="form-card">
       <h2 class="form-title">Información Personal</h2>
       
@@ -161,26 +257,7 @@
           <span class="field-hint">Este dato proviene de tu nombre de cuenta</span>
         </div>
 
-        <!-- Row 2: Título Profesional -->
-        <div class="form-field">
-          <label for="jobTitle" class="field-label">Título Profesional <span class="required">*</span></label>
-          <input
-            id="jobTitle"
-            type="text"
-            class="field-input"
-            [class.error]="hasError(accountForm, 'jobTitle')"
-            formControlName="jobTitle"
-            placeholder="Ingeniera de Software Senior"
-          />
-          @if (hasError(accountForm, 'jobTitle')) {
-            <div class="error-message">
-              <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
-              {{ getErrorMessage(accountForm, 'jobTitle') }}
-            </div>
-          }
-        </div>
-
-        <!-- Row 3: Resumen Profesional -->
+        <!-- Resumen Profesional -->
         <div class="form-field">
           <label for="summary" class="field-label">Resumen Profesional <span class="required">*</span></label>
           <textarea
@@ -209,7 +286,7 @@
 
         <!-- Submit Button -->
         <div class="form-actions">
-          <button type="button" class="submit-button" (click)="saveAndContinue()" [disabled]="isLoading()">
+          <button type="button" class="submit-button" (click)="saveAndContinue()" [disabled]="accountForm.invalid || (isLoading$ | async)">
             Guardar y Siguiente
             <span nz-icon nzType="arrow-right" nzTheme="outline"></span>
           </button>
@@ -219,7 +296,7 @@
   }
 
   <!-- Paso 2: Experiencia -->
-  @if (currentStep() === 1) {
+  @if ((currentStep$ | async)! === 1) {
     <div class="step-container">
       <!-- Experiencias Laborales -->
       <h2 class="step-section-title">Experiencia Laboral</h2>
@@ -295,8 +372,7 @@
                       <input 
                         type="month" 
                         formControlName="endDate" 
-                        class="field-input" 
-                        [disabled]="exp.get('isCurrent')?.value" />
+                        class="field-input" />
                     </div>
                   </div>
 
@@ -361,7 +437,7 @@
         </div>
 
         <div class="skills-list">
-          @for (skill of skills(); track skill) {
+          @for (skill of skills; track skill) {
             <span class="skill-tag">
               {{ skill }}
               <button type="button" class="skill-remove" (click)="removeSkill(skill)">
@@ -377,7 +453,7 @@
         <button type="button" class="nav-button secondary" (click)="previousStep()">
           Atrás
         </button>
-        <button type="button" class="nav-button primary" (click)="saveAndContinue()" [disabled]="isLoading()">
+        <button type="button" class="nav-button primary" (click)="saveAndContinue()" [disabled]="experienceForm.invalid || skills.length === 0 || (isLoading$ | async)">
           Guardar y Siguiente
         </button>
       </div>
@@ -385,7 +461,7 @@
   }
 
   <!-- Paso 3: Revisión -->
-  @if (currentStep() === 2) {
+  @if ((currentStep$ | async)! === 2) {
     <div class="review-container">
       <div class="review-grid">
         <!-- Columna izquierda: CV Preview -->
@@ -404,10 +480,6 @@
                   <p class="cv-info-label">Nombre Completo</p>
                   <p class="cv-info-value">{{ accountForm.get('fullName')?.value }}</p>
                 </div>
-                <div class="cv-info-item">
-                  <p class="cv-info-label">Título Profesional</p>
-                  <p class="cv-info-value">{{ accountForm.get('jobTitle')?.value }}</p>
-                </div>
               </div>
               <div class="cv-summary">
                 <p class="cv-info-label">Resumen Profesional</p>
@@ -419,29 +491,29 @@
             <section class="cv-section">
               <h3 class="cv-section-title">EXPERIENCIA LABORAL</h3>
               <div class="cv-experience-list">
-                @for (exp of experiences.controls; track $index; let i = $index) {
+                @for (exp of (resumeData.experiences || []); track $index; let i = $index) {
                   <div class="cv-experience-item" [class.first]="i === 0">
                     <div class="cv-exp-header">
-                      <h4 class="cv-exp-title">{{ exp.get('jobTitle')?.value || 'Sin título' }}</h4>
+                      <h4 class="cv-exp-title">{{ (exp.jobTitle || exp.position) || 'Sin título' }}</h4>
                       <span class="cv-exp-date">
-                        @if (exp.get('startDate')?.value) {
-                          {{ exp.get('startDate')?.value | date: 'MMM yyyy' }}
+                        @if (exp.startDate) {
+                          {{ exp.startDate | date: 'MMM yyyy' }}
                         } @else {
                           Fecha inicio
                         }
                         -
-                        @if (exp.get('isCurrent')?.value) {
+                        @if (exp.isCurrent) {
                           Presente
-                        } @else if (exp.get('endDate')?.value) {
-                          {{ exp.get('endDate')?.value | date: 'MMM yyyy' }}
+                        } @else if (exp.endDate) {
+                          {{ exp.endDate | date: 'MMM yyyy' }}
                         } @else {
                           Fecha fin
                         }
                       </span>
                     </div>
-                    <p class="cv-exp-company">{{ exp.get('company')?.value || 'Sin empresa' }}</p>
-                    @if (exp.get('description')?.value) {
-                      <p class="cv-exp-description">{{ exp.get('description')?.value }}</p>
+                    <p class="cv-exp-company">{{ exp.company || 'Sin empresa' }}</p>
+                    @if (exp.description) {
+                      <p class="cv-exp-description">{{ exp.description }}</p>
                     }
                   </div>
                 }
@@ -459,10 +531,6 @@
               <div class="summary-item">
                 <span class="summary-label">Nombre:</span>
                 <span class="summary-value">{{ accountForm.get('fullName')?.value }}</span>
-              </div>
-              <div class="summary-item">
-                <span class="summary-label">Título:</span>
-                <span class="summary-value">{{ accountForm.get('jobTitle')?.value }}</span>
               </div>
             </div>
           </div>
@@ -484,7 +552,7 @@
           <div class="summary-card">
             <h3 class="summary-card-title">Habilidades</h3>
             <div class="summary-skills">
-              @for (skill of skills(); track skill) {
+              @for (skill of skills; track skill) {
                 <span class="summary-skill-tag">{{ skill }}</span>
               }
             </div>
@@ -495,7 +563,7 @@
             <button type="button" class="nav-button secondary full-width" (click)="previousStep()">
               Atrás
             </button>
-            <button type="button" class="nav-button primary full-width" (click)="finishOnboarding()" [disabled]="isLoading()">
+            <button type="button" class="nav-button primary full-width" (click)="finishOnboarding()" [disabled]="!canFinishOnboarding || (isLoading$ | async)">
               Finalizar y Enviar
             </button>
           </div>
@@ -508,5 +576,5 @@
   <!-- Fin Formularios de Onboarding -->
 
   <!-- Footer -->
-  <p class="footer-text">© 2024 VERTEX. Todos los derechos reservados.</p>
+  <app-footer />
 </main>

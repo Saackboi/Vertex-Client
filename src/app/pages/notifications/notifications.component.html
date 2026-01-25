@@ -1,13 +1,9 @@
+<!-- Main Content -->
 <!-- Header -->
 <header class="notifications-header">
   <div class="header-container">
     <!-- Logo -->
-    <div class="logo-section">
-      <div class="logo-icon">
-        <span nz-icon nzType="rocket" nzTheme="outline"></span>
-      </div>
-      <span class="logo-text">VERTEX</span>
-    </div>
+    <app-logo route="/dashboard" />
 
     <!-- Navigation -->
     <div class="nav-section">
@@ -18,14 +14,34 @@
 
       <div class="action-buttons">
         <button class="icon-button" (click)="toggleDarkMode()">
-          <span nz-icon [nzType]="isDarkMode() ? 'sun' : 'moon'" nzTheme="outline"></span>
+          <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
         </button>
         <button class="icon-button">
-          <nz-badge [nzCount]="getUnreadCount()">
+          <nz-badge [nzCount]="(unreadCount$ | async) || 0">
             <span nz-icon nzType="bell" nzTheme="outline"></span>
           </nz-badge>
         </button>
-        <nz-avatar nzIcon="user" [nzSize]="32"></nz-avatar>
+        <nz-avatar 
+          nz-dropdown 
+          [nzDropdownMenu]="userMenu" 
+          nzPlacement="bottomRight"
+          nzIcon="user" 
+          [nzSize]="32"
+          class="user-avatar">
+        </nz-avatar>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item (click)="navigateToProfile()">
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              Mi Perfil
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Cerrar Sesión
+            </li>
+          </ul>
+        </nz-dropdown-menu>
       </div>
     </div>
   </div>
@@ -41,23 +57,28 @@
       </button>
       <h1 class="page-title">Notificaciones</h1>
     </div>
-    @if (getUnreadCount() > 0) {
+    @if ((unreadCount$ | async) ?? 0 > 0) {
       <div class="unread-badge">
-        {{ getUnreadCount() }} sin leer
+        {{ (unreadCount$ | async) ?? 0 }} sin leer
       </div>
+    }
+    @if ((unreadCount$ | async) ?? 0 > 0) {
+      <button class="mark-all-read-button" (click)="markAllAsRead()">
+        Marcar todas como leídas
+      </button>
     }
   </div>
 
   <!-- Notifications List -->
   <div class="notifications-container">
-    @if (notifications().length === 0) {
+    @if ((notifications$ | async)?.length === 0) {
       <div class="empty-state">
         <span nz-icon nzType="bell" nzTheme="outline"></span>
         <h3>No hay notificaciones</h3>
         <p>Cuando tengas notificaciones, aparecerán aquí</p>
       </div>
     } @else {
-      @for (notification of notifications(); track notification.id) {
+      @for (notification of (notifications$ | async); track notification.id) {
         <div [class]="'notification-card ' + (notification.read ? 'read' : 'unread')">
           <div class="notification-icon" [class]="notification.type">
             @if (notification.type === 'success') {
@@ -70,25 +91,25 @@
               <span nz-icon nzType="info-circle" nzTheme="outline"></span>
             }
           </div>
-
           <div class="notification-content">
             <h3 class="notification-title">{{ notification.title }}</h3>
             <p class="notification-message">{{ notification.message }}</p>
             <span class="notification-time">{{ notification.timestamp }}</span>
           </div>
-
           <div class="notification-actions">
             @if (!notification.read) {
               <button class="action-button mark-read" (click)="markAsRead(notification.id)">
                 <span nz-icon nzType="check" nzTheme="outline"></span>
               </button>
             }
-            <button class="action-button delete" (click)="deleteNotification(notification.id)">
+<!--             <button class="action-button delete" (click)="deleteNotification(notification.id)">
               <span nz-icon nzType="delete" nzTheme="outline"></span>
-            </button>
+            </button> -->
           </div>
         </div>
       }
     }
   </div>
 </main>
+
+<app-footer />

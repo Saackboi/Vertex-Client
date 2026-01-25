@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { LoginDto, RegisterDto, UserInfo } from '../../models/api.types';
+import { LoginDto, RegisterDto, UserInfo } from '../../models';
 
 // Login Actions
 export const login = createAction(

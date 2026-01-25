@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { OnboardingStatusDto, SaveProgressDto, ProfessionalProfileDto } from '../../models/api.types';
+import { OnboardingStatusDto, SaveProgressDto, ProfessionalProfileDto } from '../../models';
 
 // Load Resume
 export const loadResume = createAction('[Onboarding] Load Resume');
