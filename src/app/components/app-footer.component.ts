@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   standalone: true,
   template: `
     <footer class="app-footer">
-      <span>© 2024 VERTEX. Todos los derechos reservados.</span>
+      <span>© 2026 VERTEX. Todos los derechos reservados.</span>
     </footer>
   `,
   styleUrls: []
