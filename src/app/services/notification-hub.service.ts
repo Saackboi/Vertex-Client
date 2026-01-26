@@ -70,14 +70,14 @@ export class NotificationHubService {
         .build();
 
       // Configurar manejadores de reconexión
-      this.hubConnection.onreconnecting((error) => {
+      this.hubConnection.onreconnecting((error: any) => {
         if (!environment.production) {
           console.log('[SignalR] Reconectando...', error?.message || '');
         }
         this.connectionStateSubject.next(false);
       });
 
-      this.hubConnection.onreconnected((connectionId) => {
+      this.hubConnection.onreconnected((connectionId: any) => {
         if (!environment.production) {
           console.log('[SignalR] ✓ Reconectado:', connectionId);
         }
@@ -85,7 +85,7 @@ export class NotificationHubService {
         this.requestHistory(); // Recargar notificaciones
       });
 
-      this.hubConnection.onclose((error) => {
+      this.hubConnection.onclose((error: any) => {
         if (!environment.production && error) {
           console.warn('[SignalR] Conexión cerrada:', error.message);
         }
