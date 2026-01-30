@@ -237,7 +237,3 @@ this.store.dispatch(AuthActions.login({ credentials }));
 ```
 
 ---
-
-## 📄 Licencia
-
-MIT
