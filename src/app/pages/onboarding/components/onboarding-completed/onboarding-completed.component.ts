@@ -113,6 +113,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      overflow-wrap: anywhere;
     }
 
     .bento-stats {
@@ -180,15 +181,18 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
     .bento-exp-role {
       font-weight: 600;
       color: var(--onboarding-text);
+      overflow-wrap: anywhere;
     }
 
     .bento-exp-company {
       color: var(--onboarding-muted);
+      overflow-wrap: anywhere;
     }
 
     .bento-exp-date {
       font-size: 0.85rem;
       color: var(--onboarding-muted);
+      overflow-wrap: anywhere;
     }
 
     .bento-skills {
@@ -223,6 +227,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       font-size: 0.85rem;
       color: var(--onboarding-muted);
       margin: 0;
+      overflow-wrap: anywhere;
     }
 
     .bento-info {
@@ -235,6 +240,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       margin: 0;
       color: #92400e;
       line-height: 1.6;
+      overflow-wrap: anywhere;
     }
 
     :host-context(.dark) .bento-info {
@@ -257,8 +263,24 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
         font-size: 1.75rem;
       }
 
+      .completed-container {
+        padding: 0 1rem;
+      }
+
+      .completed-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem;
+      }
+
+      .hero-icon {
+        font-size: 2.25rem;
+      }
+
       .profile-bento {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
       }
 
       .bento-summary,
@@ -268,6 +290,98 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       .bento-actions,
       .bento-info {
         grid-column: span 1;
+      }
+
+      .bento-card {
+        width: 100%;
+      }
+
+      .bento-card {
+        padding: 1.25rem;
+      }
+
+      .bento-name {
+        font-size: 1.25rem;
+      }
+
+      .stat-value {
+        font-size: 1.25rem;
+      }
+
+      .bento-actions button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .profile-bento {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .bento-summary,
+      .bento-stats,
+      .bento-experience,
+      .bento-skills,
+      .bento-actions,
+      .bento-info {
+        grid-column: span 1;
+      }
+
+      .bento-stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bento-actions button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .completed-container {
+        margin: 1.5rem auto 2.5rem;
+      }
+
+      .hero-title {
+        font-size: 1.6rem;
+      }
+
+      .hero-description {
+        font-size: 0.9rem;
+      }
+
+      .bento-title {
+        font-size: 0.75rem;
+      }
+
+      .bento-name {
+        font-size: 1.15rem;
+      }
+
+      .stat-value {
+        font-size: 1.15rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 1.5rem;
+      }
+
+      .hero-description {
+        font-size: 0.9rem;
+      }
+
+      .bento-card {
+        padding: 1rem;
+      }
+
+      .bento-title {
+        font-size: 0.75rem;
+      }
+
+      .bento-stat-grid {
+        grid-template-columns: 1fr;
       }
     }
 

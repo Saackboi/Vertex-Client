@@ -33,7 +33,7 @@ export class OnboardingStepExperienceComponent {
   @Output() addExperience = new EventEmitter<void>();
   @Output() openExperienceModal = new EventEmitter<number | undefined>();
   @Output() removeExperience = new EventEmitter<number>();
-  @Output() addSkill = new EventEmitter<KeyboardEvent>();
+  @Output() addSkill = new EventEmitter<Event | KeyboardEvent | HTMLInputElement>();
   @Output() removeSkill = new EventEmitter<string>();
   @Output() saveAndContinue = new EventEmitter<void>();
   @Output() previousStep = new EventEmitter<void>();

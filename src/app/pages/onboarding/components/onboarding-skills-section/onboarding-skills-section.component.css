@@ -37,6 +37,26 @@
   color: var(--onboarding-text);
 }
 
+.skill-add-button {
+  display: none;
+  width: 100%;
+  margin: 0 0 1.25rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #86efac;
+  background: #ecfdf3;
+  color: #166534;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skill-add-button:hover {
+  background: #dcfce7;
+  border-color: #4ade80;
+}
+
 .skill-input:focus {
   outline: none;
   border-color: #43A047;
@@ -53,6 +73,14 @@
 @media (min-width: 640px) {
   .skills-list {
     gap: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .skill-add-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

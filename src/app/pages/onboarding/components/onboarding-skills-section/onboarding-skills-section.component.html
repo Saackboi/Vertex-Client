@@ -2,12 +2,23 @@
   <div class="skill-input-wrapper">
     <span nz-icon nzType="search" nzTheme="outline" class="search-icon"></span>
     <input
+      #skillInput
       type="text"
       class="skill-input"
-      placeholder="A?ade una habilidad y presiona Enter"
-      (keydown)="addSkill.emit()"
+      placeholder="Añade una habilidad y presiona Enter"
+      enterkeyhint="done"
+      inputmode="text"
+      (keyup.enter)="addSkill.emit($event)"
+      (blur)="addSkill.emit(skillInput)"
     />
   </div>
+
+  <button
+    type="button"
+    class="skill-add-button"
+    (click)="addSkill.emit(skillInput)">
+    Agregar
+  </button>
 
   <div class="skills-list">
     @for (skill of skills; track skill) {
@@ -23,7 +34,7 @@
 
 <div class="form-navigation">
   <button type="button" class="nav-button secondary" (click)="previousStep.emit()">
-    Atr?s
+    Atrás
   </button>
   <button
     type="button"
