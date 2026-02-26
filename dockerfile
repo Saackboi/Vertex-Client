@@ -14,7 +14,7 @@ RUN npm run build --configuration=production
 # Etapa 2: Servidor Nginx
 FROM nginx:stable-alpine
 # Copiamos el build de Angular a Nginx
-COPY --from=build /app/dist/vertex-client/browser /usr/share/nginx/html
+COPY --from=build /app/dist/Client2/browser /usr/share/nginx/html
 # Copiamos una configuración de Nginx para manejar rutas de Angular (SPA)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
