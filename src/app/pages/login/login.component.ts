@@ -94,8 +94,9 @@ export class LoginComponent {
   /**
    * Alterna entre modo Login y Registro
    */
-  toggleMode(): void {
-    this.isLoginMode.update(mode => !mode);
+  toggleMode(isLoginMode: boolean): void {
+    if (this.isLoginMode() === isLoginMode) return;
+    this.isLoginMode.set(isLoginMode);
     this.store.dispatch(AuthActions.clearError());
     this.loginForm.reset();
     this.registerForm.reset();

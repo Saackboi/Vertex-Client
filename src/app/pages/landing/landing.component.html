@@ -5,10 +5,12 @@
       <div class="nav-links">
         <a class="nav-link active" href="#">Inicio</a>
         <a class="nav-link" href="#caracteristicas">Características</a>
-        <a class="nav-link" href="#precios">Precios</a>
       </div>
     </div>
     <div class="nav-right">
+      <button class="theme-toggle" (click)="toggleTheme()" aria-label="Cambiar tema">
+        <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+      </button>
       @if (isAuthenticated$ | async) {
         <button nz-button nzType="primary" class="dashboard-button" (click)="goToOnboarding()">
           Ir a mi Perfil
@@ -46,97 +48,76 @@
 <main class="main-content">
   <section class="hero-section">
     <div class="hero-container">
-      <h1 class="hero-title">
-        Impulsa tu Carrera con un Perfil Profesional Inteligente
-      </h1>
-      <p class="hero-subtitle">
-        Crea, gestiona y optimiza tu currículum y perfil profesional con herramientas inteligentes que te abren puertas.
-      </p>
-      <div class="hero-actions">
-        @if (isAuthenticated$ | async) {
-          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToOnboarding()">
-            @if (isCompleted$ | async) {
-              Ver perfil
-            } @else {
-              @if (onboardingInProgress$ | async) {
-                Continuar creación de perfil
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          Impulsa tu Carrera con un Perfil Profesional Inteligente
+        </h1>
+        <p class="hero-subtitle">
+          Crea, gestiona y optimiza tu currículum y perfil profesional con herramientas inteligentes que te abren puertas.
+        </p>
+        <div class="hero-actions">
+          @if (isAuthenticated$ | async) {
+            <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToOnboarding()">
+              @if (isCompleted$ | async) {
+                Ver perfil
               } @else {
-                Crear mi Perfil Gratis
+                @if (onboardingInProgress$ | async) {
+                  Continuar creación de perfil
+                } @else {
+                  Crear mi Perfil Gratis
+                }
               }
-            }
-          </button>
-        } @else {
-          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToLogin()">
-            Crear mi Perfil Gratis
-          </button>
-          <button nz-button nzType="default" nzSize="large" class="cta-secondary" (click)="goToLogin()">
-            Iniciar Sesión
-          </button>
-        }
+            </button>
+          } @else {
+            <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToLogin()">
+              Crear mi Perfil Gratis
+            </button>
+            <button nz-button nzType="default" nzSize="large" class="cta-secondary" (click)="goToLogin()">
+              Iniciar Sesión
+            </button>
+          }
+        </div>
       </div>
-      <div class="hero-image">
-        <div class="image-glow"></div>
-        <div class="image-container">
-          <img 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjA1gg2zqLaR4jT4H1pCWl2lrW6swWcMtRyGWdpH91X8zakiDPQxc539rSq_7L0yI_PI9o1Z0DspxBJZI0xHl0riH2RJGoakcEVfuBff0lnpaMBZmdnRh39yixMdPBML3fme_zheEASGzgl2rnt53ZHs5xdQPxRGPp4tdtiPBDDwWYpOiXWUqa99Kxb_P3NaW7PYpuaHqXLBkKsH6iUHmQ1FKIjIwnTXEWGWdlsSpCZzfwpdjC9IInjOHyaPdUEtHgcEZsv-1R0ac"
-            alt="Vertex dashboard preview"
-            class="dashboard-preview"
-          />
+      <div class="hero-preview">
+        <div class="preview-window">
+          <div class="window-bar">
+            <span class="window-dot dot-red"></span>
+            <span class="window-dot dot-yellow"></span>
+            <span class="window-dot dot-green"></span>
+          </div>
+          <div class="window-body">
+            <div class="preview-header">
+              <h3>Revisión de Perfil</h3>
+              <p>Vista previa del perfil final</p>
+            </div>
+            <div class="preview-grid">
+              <div class="preview-card">
+                <span class="preview-label">Información personal</span>
+                <p class="preview-text">Nombre, resumen profesional y objetivos.</p>
+              </div>
+              <div class="preview-card">
+                <span class="preview-label">Experiencia</span>
+                <ul class="preview-list">
+                  <li>Frontend Developer · Tech Studio</li>
+                  <li>UI Engineer · Vertex Labs</li>
+                </ul>
+              </div>
+              <div class="preview-card">
+                <span class="preview-label">Habilidades</span>
+                <div class="preview-tags">
+                  <span>Angular</span>
+                  <span>TypeScript</span>
+                  <span>NgRx</span>
+                  <span>UI Design</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="features-section" id="caracteristicas">
-    <div class="features-container">
-      <div class="section-header">
-        <h2 class="section-title">Características que te Impulsan</h2>
-        <div class="title-underline"></div>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">
-            <span nz-icon nzType="save" nzTheme="outline"></span>
-          </div>
-          <h3 class="feature-title">Auto-Guardado Inteligente</h3>
-          <p class="feature-description">
-            Nunca pierdas tu progreso. VERTEX guarda automáticamente cada cambio mientras trabajas, para que siempre estés al día.
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <span nz-icon nzType="layout" nzTheme="outline"></span>
-          </div>
-          <h3 class="feature-title">Formato Profesional</h3>
-          <p class="feature-description">
-            Accede a plantillas de diseño impecables que garantizan una presentación pulcra y moderna de tu experiencia.
-          </p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">
-            <span nz-icon nzType="safety" nzTheme="outline"></span>
-          </div>
-          <h3 class="feature-title">Seguridad Garantizada</h3>
-          <p class="feature-description">
-            Tus datos están seguros con nosotros. Implementamos las mejores prácticas de seguridad para proteger tu información.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta-section">
-    <div class="cta-container">
-      <div class="cta-card">
-        <div class="cta-glow"></div>
-        <h2 class="cta-title">¿Listo para transformar tu carrera profesional?</h2>
-        <p class="cta-subtitle">Únete a miles de profesionales que ya están usando Vertex para encontrar mejores oportunidades.</p>
-        <button nz-button nzType="default" nzSize="large" class="cta-button" (click)="goToLogin()">
-          Empieza hoy mismo
-        </button>
-      </div>
-    </div>
-  </section>
 
   <section class="features-section" id="caracteristicas">
     <div class="features-container">

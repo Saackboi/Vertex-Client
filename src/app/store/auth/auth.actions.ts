@@ -17,6 +17,11 @@ export const loginFailure = createAction(
   props<{ error: string }>()
 );
 
+export const restoreSession = createAction(
+  '[Auth] Restore Session',
+  props<{ user: UserInfo; token: string }>()
+);
+
 // Register Actions
 export const register = createAction(
   '[Auth] Register',

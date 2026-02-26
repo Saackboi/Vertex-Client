@@ -22,12 +22,65 @@ body {
   color: rgba(0, 0, 0, 0.85);
   font-size: 14px;
   line-height: 1.5715;
-  background-color: #f0f2f5;
+  background-color: var(--app-bg);
 }
 
 :root {
   --brand-green: #43A047;
   --brand-green-dark: #2e7d32;
+  --app-bg: #f1f5f9;
+  --cta-bg: #ffffff;
+  --cta-text: #0f172a;
+  --cta-muted: #64748b;
+  --cta-border: rgba(148, 163, 184, 0.25);
+  --cta-accent: #43A047;
+  --cta-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+  --landing-bg: #ffffff;
+  --landing-surface: #f8fafc;
+  --landing-card: #ffffff;
+  --landing-border: rgba(148, 163, 184, 0.2);
+  --landing-text: #0f172a;
+  --landing-muted: #64748b;
+  --landing-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  --landing-accent: #43A047;
+  --landing-hero-glow: rgba(67, 160, 71, 0.12);
+  --onboarding-bg: #f1f5f9;
+  --onboarding-surface: #ffffff;
+  --onboarding-card: #ffffff;
+  --onboarding-border: #e2e8f0;
+  --onboarding-text: #1e293b;
+  --onboarding-muted: #64748b;
+  --onboarding-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --onboarding-accent: #43A047;
+  --onboarding-accent-soft: rgba(67, 160, 71, 0.12);
+}
+
+.dark {
+  --app-bg: #0b1220;
+  --cta-bg: #0f172a;
+  --cta-text: #f8fafc;
+  --cta-muted: rgba(226, 232, 240, 0.7);
+  --cta-border: rgba(148, 163, 184, 0.2);
+  --cta-accent: #43A047;
+  --cta-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --landing-bg: #0b1220;
+  --landing-surface: #0f172a;
+  --landing-card: #101b2d;
+  --landing-border: rgba(148, 163, 184, 0.2);
+  --landing-text: #f8fafc;
+  --landing-muted: rgba(226, 232, 240, 0.7);
+  --landing-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+  --landing-accent: #43A047;
+  --landing-hero-glow: rgba(67, 160, 71, 0.18);
+  --onboarding-bg: #0b1220;
+  --onboarding-surface: #0f172a;
+  --onboarding-card: #101b2d;
+  --onboarding-border: #1e293b;
+  --onboarding-text: #f8fafc;
+  --onboarding-muted: rgba(226, 232, 240, 0.7);
+  --onboarding-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --onboarding-accent: #43A047;
+  --onboarding-accent-soft: rgba(67, 160, 71, 0.2);
 }
 
 .ant-btn-primary {
@@ -63,5 +116,124 @@ body {
 
 .ant-radio-checked .ant-radio-inner::after {
   background-color: var(--brand-green) !important;
+}
+
+/* Footer (global) */
+.app-footer {
+  background: radial-gradient(circle at top left, rgba(67, 160, 71, 0.18), transparent 45%),
+    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.7), transparent 55%),
+    linear-gradient(180deg, #0b1a16 0%, #050a10 100%);
+  color: #e2e8f0;
+  padding: 4rem 0 2.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.app-footer .footer-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.app-footer .footer-top {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .app-footer .footer-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .app-footer .footer-top {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+}
+
+.app-footer .brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.app-footer .brand-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #d1fae5;
+}
+
+.app-footer .brand-text {
+  color: rgba(226, 232, 240, 0.7);
+  line-height: 1.7;
+  max-width: 24rem;
+}
+
+.app-footer .link-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-footer .link-title {
+  font-weight: 700;
+  color: #f8fafc;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+}
+
+.app-footer .footer-link {
+  color: rgba(226, 232, 240, 0.7);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.app-footer .footer-link:hover {
+  color: #86efac;
+  transform: translateX(2px);
+}
+
+.app-footer .footer-bottom {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .app-footer .footer-bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.app-footer .legal {
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.app-footer .socials {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.app-footer .social-link {
+  color: rgba(226, 232, 240, 0.7);
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.2s ease;
+}
+
+.app-footer .social-link:hover {
+  color: #a7f3d0;
 }
 

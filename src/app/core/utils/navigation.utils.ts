@@ -16,7 +16,7 @@ export class NavigationUtils {
   }
 
   static goToDashboard(router: Router) {
-    router.navigate(['/dashboard']);
+    router.navigate(['/']);
   }
 
   static goToOnboarding(router: Router) {

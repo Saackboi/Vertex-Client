@@ -17,17 +17,17 @@ export const loadResumeFailure = createAction(
 // Save Progress
 export const saveProgress = createAction(
   '[Onboarding] Save Progress',
-  props<{ dto: SaveProgressDto }>()
+  props<{ dto: SaveProgressDto; silent?: boolean }>()
 );
 
 export const saveProgressSuccess = createAction(
   '[Onboarding] Save Progress Success',
-  props<{ data: OnboardingStatusDto }>()
+  props<{ data: OnboardingStatusDto; silent?: boolean }>()
 );
 
 export const saveProgressFailure = createAction(
   '[Onboarding] Save Progress Failure',
-  props<{ error: string }>()
+  props<{ error: string; silent?: boolean }>()
 );
 
 // Complete Onboarding

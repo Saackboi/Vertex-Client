@@ -3,8 +3,8 @@ import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } fr
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { map, takeUntil, startWith } from 'rxjs/operators';
+import { Observable, Subject, firstValueFrom } from 'rxjs';
+import { debounceTime, map, take, takeUntil, startWith } from 'rxjs/operators';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
@@ -64,6 +64,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly destroy$ = new Subject<void>();
+  private readonly autosave$ = new Subject<void>();
 
   // Observables del Store (para usar con async pipe)
   readonly currentStep$: Observable<number> = this.store.select(selectCurrentStep);
@@ -95,14 +96,20 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   isDarkMode = false;
   skills: string[] = [];
   resumeData: any = {};
+  private isHydrating = false;
+  private autosaveEnabled = false;
 
   // Formularios
   accountForm!: FormGroup;
   experienceForm!: FormGroup;
+  experienceModalForm!: FormGroup;
+  isExperienceModalVisible = false;
+  editingExperienceIndex: number | null = null;
 
   ngOnInit(): void {
     this.initializeForms();
     this.subscribeToStoreUpdates();
+    this.setupAutosave();
     this.store.select(selectIsAuthenticated).pipe(takeUntil(this.destroy$)).subscribe(isAuth => {
       if (isAuth) {
         this.store.dispatch(OnboardingActions.loadResume());
@@ -121,12 +128,28 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     // Inicializar formularios
     this.accountForm = this.fb.group({
       fullName: ['', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
-      summary: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(500), noEmojiValidator()]]
+      summary: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500), noEmojiValidator()]]
     });
 
     this.experienceForm = this.fb.group({
       experiences: this.fb.array([])
     });
+  }
+
+  private createExperienceGroup(exp?: any): FormGroup {
+    const group = this.fb.group({
+      jobTitle: [exp?.jobTitle || '', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
+      company: [exp?.company || '', [Validators.required, Validators.minLength(2), noEmojiValidator()]],
+      startDate: [exp?.startDate || null, [Validators.required]],
+      endDate: [exp?.endDate || null],
+      isCurrent: [!!exp?.isCurrent],
+      description: [exp?.description || '', [Validators.required, Validators.minLength(10), Validators.maxLength(500), noEmojiValidator()]]
+    });
+    this.configureEndDateControl(group);
+    if (exp?.isCurrent) {
+      group.get('endDate')?.disable({ emitEvent: false });
+    }
+    return group;
   }
 
   private subscribeToStoreUpdates(): void {
@@ -142,10 +165,12 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.onboardingData$
       .pipe(takeUntil(this.destroy$))
       .subscribe(stateData => {
+        this.isHydrating = true;
         const flat = stateData && (stateData as any).data ? (stateData as any).data : (stateData || {});
         
         if (!flat || Object.keys(flat).length === 0) {
           this.resumeData = {};
+          this.isHydrating = false;
           return;
         }
 
@@ -155,6 +180,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
         this.accountForm.patchValue({
           summary: hydrated.summary || ''
         }, { emitEvent: false });
+        this.accountForm.updateValueAndValidity({ emitEvent: false });
 
         // Reconstruir FormArray de experiencias
         this.rebuildFormArrays(hydrated);
@@ -165,6 +191,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       }
 
       this.resumeData = hydrated;
+      this.isHydrating = false;
     });
 
     // Mostrar mensajes de error
@@ -186,21 +213,9 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       this.experiences.removeAt(0);
     }
 
-    if (Array.isArray(formData.experiences)) {
-      formData.experiences.forEach((exp: any, index: number) => {
-        const expGroup = this.fb.group({
-          jobTitle: [exp.jobTitle || '', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
-          company: [exp.company || '', [Validators.required, Validators.minLength(2), noEmojiValidator()]],
-          startDate: [exp.startDate || null, [Validators.required]],
-          endDate: [exp.endDate || null],
-          isCurrent: [!!exp.isCurrent],
-          description: [exp.description || '', [Validators.required, Validators.minLength(20), Validators.maxLength(500), noEmojiValidator()]]
-        });
-        
-        this.configureEndDateControl(expGroup);
-        if (exp.isCurrent) {
-          expGroup.get('endDate')?.disable({ emitEvent: false });
-        }
+      if (Array.isArray(formData.experiences)) {
+        formData.experiences.forEach((exp: any, index: number) => {
+        const expGroup = this.createExperienceGroup(exp);
         this.experiences.push(expGroup);
       });
     }
@@ -223,19 +238,52 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     return currentStep === 0 ? this.accountForm : this.experienceForm;
   }
 
-  addExperience(): void {
-    const experienceGroup = this.fb.group({
-      jobTitle: ['', [Validators.required, Validators.minLength(3), noEmojiValidator()]],
-      company: ['', [Validators.required, Validators.minLength(2), noEmojiValidator()]],
-      startDate: ['', [Validators.required]],
-      endDate: [''],
-      isCurrent: [false],
-      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500), noEmojiValidator()]]
-    });
+  get isSummaryTooShort(): boolean {
+    if (!this.accountForm) return true;
+    const summary = this.accountForm.get('summary')?.value ?? '';
+    return summary.trim().length < 10;
+  }
 
-    this.configureEndDateControl(experienceGroup);
-    this.experiences.push(experienceGroup);
-    this.message.success('¡Experiencia agregada!');
+  addExperience(): void {
+    this.openExperienceModal();
+  }
+
+  openExperienceModal(index?: number): void {
+    this.editingExperienceIndex = typeof index === 'number' ? index : null;
+    const existing = typeof index === 'number' ? this.experiences.at(index)?.getRawValue() : null;
+    this.experienceModalForm = this.createExperienceGroup(existing);
+    this.isExperienceModalVisible = true;
+  }
+
+  closeExperienceModal(): void {
+    this.isExperienceModalVisible = false;
+    this.editingExperienceIndex = null;
+  }
+
+  saveExperienceModal(): void {
+    if (!this.experienceModalForm || this.experienceModalForm.invalid) {
+      this.experienceModalForm.markAllAsTouched();
+      return;
+    }
+
+    const value = this.experienceModalForm.getRawValue();
+
+    if (this.editingExperienceIndex !== null) {
+      const target = this.experiences.at(this.editingExperienceIndex);
+      if (target) {
+        target.patchValue(value);
+        if (value.isCurrent) {
+          target.get('endDate')?.disable({ emitEvent: false });
+        }
+      }
+    } else {
+      const newGroup = this.createExperienceGroup(value);
+      this.experiences.push(newGroup);
+    }
+
+    this.enableAutosave();
+    this.autosave$.next();
+    this.closeExperienceModal();
   }
 
   private configureEndDateControl(group: FormGroup): void {
@@ -280,18 +328,24 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       this.skills = [...this.skills, skill];
       input.value = '';
       this.message.success(`¡Habilidad "${skill}" agregada!`);
+      this.enableAutosave();
+      this.autosave$.next();
       event.preventDefault();
     }
   }
 
   removeSkill(skill: string): void {
     this.skills = this.skills.filter(s => s !== skill);
+    this.enableAutosave();
+    this.autosave$.next();
   }
 
   removeExperience(index: number): void {
     if (index >= 0 && index < this.experiences.length) {
       this.experiences.removeAt(index);
       this.message.success('Experiencia eliminada');
+      this.enableAutosave();
+      this.autosave$.next();
     }
   }
 
@@ -302,13 +356,10 @@ export class OnboardingComponent implements OnInit, OnDestroy {
    */
   private async handleNavigation(direction: 'next' | 'back'): Promise<void> {
     try {
-      // eslint-disable-next-line no-console
-      console.log('[Onboarding] handleNavigation - direction:', direction);
-      
+      this.removeEmptyExperiences();
+
       // Obtener currentStep del observable
-      const currentFrontendStep = await new Promise<number>(resolve => {
-        this.currentStep$.pipe(takeUntil(this.destroy$)).subscribe(s => resolve(s));
-      });
+      const currentFrontendStep = await firstValueFrom(this.currentStep$.pipe(take(1)));
       
       // Frontend usa 0-indexed (0, 1, 2), Backend usa 1-indexed (1, 2, 3)
       const targetFrontendStep = direction === 'next' 
@@ -336,34 +387,173 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     }
   }
 
+  private removeEmptyExperiences(): void {
+    const emptyIndexes: number[] = [];
+    this.experiences.controls.forEach((control, index) => {
+      const value = control.getRawValue();
+      const hasJobTitle = (value.jobTitle || '').trim().length > 0;
+      const hasCompany = (value.company || '').trim().length > 0;
+      const hasStartDate = !!value.startDate;
+      const hasEndDate = !!value.endDate;
+      const hasDescription = (value.description || '').trim().length > 0;
+      const hasCurrentFlag = !!value.isCurrent;
+
+      const hasAnyContent = hasJobTitle || hasCompany || hasStartDate || hasEndDate || hasDescription || hasCurrentFlag;
+      if (!hasAnyContent) {
+        emptyIndexes.push(index);
+      }
+    });
+
+    for (let i = emptyIndexes.length - 1; i >= 0; i -= 1) {
+      this.experiences.removeAt(emptyIndexes[i]);
+    }
+  }
+
+  private setupAutosave(): void {
+    this.accountForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.enableAutosave();
+        this.autosave$.next();
+      });
+
+    this.experienceForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.enableAutosave();
+        this.autosave$.next();
+      });
+
+    this.autosave$
+      .pipe(debounceTime(6000), takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.isHydrating || !this.autosaveEnabled) return;
+        this.autosaveProgress();
+      });
+  }
+
+  private enableAutosave(): void {
+    if (!this.autosaveEnabled && !this.isHydrating) {
+      this.autosaveEnabled = true;
+    }
+  }
+
+  private async autosaveProgress(): Promise<void> {
+    const summary = (this.accountForm.get('summary')?.value || '').trim();
+    const hasSummary = summary.length > 0;
+    const hasSkills = this.skills.length > 0;
+    const hasExperienceContent = this.hasExperienceContent();
+    const hasEmptyExperience = this.hasEmptyExperience();
+    const hasIncompleteExperience = this.hasIncompleteExperience();
+
+    if (!hasSummary && !hasSkills && !hasExperienceContent) {
+      return;
+    }
+
+    if (hasEmptyExperience || hasIncompleteExperience) {
+      return;
+    }
+
+    const currentFrontendStep = await firstValueFrom(this.currentStep$.pipe(take(1)));
+    const targetBackendStep = currentFrontendStep + 1;
+    const formData = this.accountForm.getRawValue();
+    const experienceControls = this.getNonEmptyExperienceControls();
+
+    const dto: SaveProgressDto = OnboardingMapper.toSaveDto(
+      formData,
+      experienceControls,
+      this.skills,
+      targetBackendStep
+    );
+    dto.isCompleted = false;
+
+    this.store.dispatch(OnboardingActions.saveProgress({ dto, silent: true }));
+  }
+
+  private hasExperienceContent(): boolean {
+    return this.experiences.controls.some(control => {
+      const value = control.getRawValue();
+      return (
+        (value.jobTitle || '').trim().length > 0 ||
+        (value.company || '').trim().length > 0 ||
+        !!value.startDate ||
+        !!value.endDate ||
+        (value.description || '').trim().length > 0 ||
+        !!value.isCurrent
+      );
+    });
+  }
+
+  private getNonEmptyExperienceControls(): FormGroup[] {
+    return this.experiences.controls.filter(control => {
+      const value = control.getRawValue();
+      return (
+        (value.jobTitle || '').trim().length > 0 ||
+        (value.company || '').trim().length > 0 ||
+        !!value.startDate ||
+        !!value.endDate ||
+        (value.description || '').trim().length > 0 ||
+        !!value.isCurrent
+      );
+    }) as FormGroup[];
+  }
+
+  private hasEmptyExperience(): boolean {
+    return this.experiences.controls.some(control => {
+      const value = control.getRawValue();
+      const hasJobTitle = (value.jobTitle || '').trim().length > 0;
+      const hasCompany = (value.company || '').trim().length > 0;
+      const hasStartDate = !!value.startDate;
+      const hasEndDate = !!value.endDate;
+      const hasDescription = (value.description || '').trim().length > 0;
+      const hasCurrentFlag = !!value.isCurrent;
+      const hasAnyContent = hasJobTitle || hasCompany || hasStartDate || hasEndDate || hasDescription || hasCurrentFlag;
+      return !hasAnyContent;
+    });
+  }
+
+  private hasIncompleteExperience(): boolean {
+    return this.experiences.controls.some(control => {
+      const value = control.getRawValue();
+      const hasJobTitle = (value.jobTitle || '').trim().length > 0;
+      const hasCompany = (value.company || '').trim().length > 0;
+      const hasStartDate = !!value.startDate;
+      const hasDescription = (value.description || '').trim().length > 0;
+      const hasAnyContent = hasJobTitle || hasCompany || hasStartDate || hasDescription || !!value.endDate || !!value.isCurrent;
+
+      if (!hasAnyContent) return false;
+
+      return !(hasJobTitle && hasCompany && hasStartDate && hasDescription);
+    });
+  }
+
   previousStep(): void {
     this.handleNavigation('back');
   }
 
   async saveAndContinue(): Promise<void> {
-    const currentStep = await new Promise<number>(resolve => {
-      this.currentStep$.pipe(takeUntil(this.destroy$)).subscribe(s => resolve(s));
-    });
-    
-    const currentForm = this.getCurrentForm(currentStep);
-    if (currentForm.invalid) {
-      FormUtils.markFormDirty(currentForm);
-      this.message.warning('Por favor completa todos los campos requeridos correctamente');
-      return;
-    }
+    const currentStep = await firstValueFrom(this.currentStep$.pipe(take(1)));
 
     // Validaciones por step
     if (currentStep === 0) {
+      const currentForm = this.getCurrentForm(currentStep);
+      if (currentForm.invalid) {
+        FormUtils.markFormDirty(currentForm);
+        this.message.warning('Por favor completa todos los campos requeridos correctamente');
+        return;
+      }
       const summary = this.accountForm.get('summary')?.value || '';
-      if (summary.length < 50) {
-        this.message.warning('El resumen profesional debe tener al menos 50 caracteres');
+      if (summary.trim().length < 10) {
+        this.message.warning('El resumen profesional debe tener al menos 10 caracteres');
         return;
       }
     }
 
     if (currentStep === 1) {
-      if (this.experiences.length === 0) {
-        this.message.warning('Agrega al menos una experiencia laboral');
+      const currentForm = this.getCurrentForm(currentStep);
+      if (currentForm.invalid) {
+        FormUtils.markFormDirty(currentForm);
+        this.message.warning('Por favor completa todos los campos requeridos correctamente');
         return;
       }
       if (this.skills.length === 0) {
@@ -397,7 +587,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   }
 
   navigateToDashboard(): void {
-    NavigationUtils.goToDashboard(this.router);
+    NavigationUtils.goToLanding(this.router);
   }
 
   logout(): void {

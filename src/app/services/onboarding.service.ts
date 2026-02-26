@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';import { ErrorHandlerService } from '../core/services/error-handler.service';import {
+import { catchError, map } from 'rxjs/operators';
+import { ErrorHandlerService } from '../core/services/error-handler.service';
+import {
   ApiResponse,
   SaveProgressDto,
   OnboardingStatusDto,
@@ -52,7 +54,6 @@ export class OnboardingService {
         catchError((error: HttpErrorResponse) => {
           // Si es 404, retornar null (usuario nuevo sin progreso)
           if (error.status === 404) {
-            console.log('No hay progreso de onboarding previo, iniciando desde el paso 1');
             return of(null); // Retornar observable con null
           }
           return this.handleError(error);
@@ -80,7 +81,6 @@ export class OnboardingService {
    */
   private handleResponse<T>(response: ApiResponse<T>, successMessage: string): T {
     if (response.success && response.data) {
-      console.log(`✅ ${successMessage}`);
       return response.data;
     } else {
       const errorMessage = response.errors.length > 0 

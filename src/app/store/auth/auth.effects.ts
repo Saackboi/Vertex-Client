@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
+import { of, EMPTY } from 'rxjs';
 import { map, exhaustMap, catchError, tap, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { OnboardingService } from '../../services/onboarding.service';
 import { ErrorHandlerService } from '../../core/services/error-handler.service';
 import { NotificationService } from '../../core/services/notification.service';
 import * as AuthActions from './auth.actions';
+import * as OnboardingActions from '../onboarding/onboarding.actions';
 
 @Injectable()
 export class AuthEffects {
@@ -18,6 +19,27 @@ export class AuthEffects {
   private router = inject(Router);
   private errorHandler = inject(ErrorHandlerService);
   private notificationService = inject(NotificationService);
+
+  init$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType('@ngrx/effects/init'),
+      switchMap(() => {
+        const token = this.authService.getToken();
+        const user = this.authService.getUserInfo();
+        if (token && user) {
+          return of(AuthActions.restoreSession({ user, token }));
+        }
+        return EMPTY;
+      })
+    )
+  );
+
+  restoreSession$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.restoreSession),
+      map(() => OnboardingActions.loadResume())
+    )
+  );
 
   login$ = createEffect(() =>
     this.actions$.pipe(

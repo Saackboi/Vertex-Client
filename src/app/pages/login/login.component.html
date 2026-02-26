@@ -18,13 +18,13 @@
         <button
           type="button"
           [class.active]="isLoginMode()"
-          (click)="isLoginMode.set(true)">
+          (click)="toggleMode(true)">
           Iniciar Sesión
         </button>
         <button
           type="button"
           [class.active]="!isLoginMode()"
-          (click)="isLoginMode.set(false)">
+          (click)="toggleMode(false)">
           Registrarse
         </button>
       </div>

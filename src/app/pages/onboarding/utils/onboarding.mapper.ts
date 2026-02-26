@@ -11,17 +11,12 @@ export class OnboardingMapper {
   static toFormData(input: any): any {
     if (!input) return {};
 
-    // eslint-disable-next-line no-console
-    console.log('[Mapper] toFormData - INPUT:', input);
-
     let parsed = input;
     // 1. Detección de tipo: parsear solo si es string
     if (typeof input === 'string') {
       try {
         parsed = JSON.parse(input);
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error('[Mapper] Error parsing JSON string:', e);
         return {};
       }
     }
@@ -58,10 +53,6 @@ export class OnboardingMapper {
       experiences
     };
 
-    // eslint-disable-next-line no-console
-    console.log('[Mapper] toFormData - OUTPUT:', result);
-    // eslint-disable-next-line no-console
-    console.log('[Mapper] toFormData - experiences detail:', experiences);
     return result;
   }
 
@@ -70,23 +61,11 @@ export class OnboardingMapper {
    * Maneja toda la transformación de datos (fechas, experiencias, etc.)
    */
   static toSaveDto(accountFormValue: any, experiencesControls: any[], skills: string[], targetStep: number): SaveProgressDto {
-    // eslint-disable-next-line no-console
-    console.log('[Mapper] toSaveDto - INPUT accountFormValue:', accountFormValue);
-    // eslint-disable-next-line no-console
-    console.log('[Mapper] toSaveDto - experiencesControls count:', experiencesControls.length);
-    
     const experiencesData: WorkEntry[] = experiencesControls.map((control, index) => {
       const val = control.value;
-      // eslint-disable-next-line no-console
-      console.log(`[Mapper] toSaveDto - Processing experience ${index}:`, val);
-      
       // Convertir formato YYYY-MM a ISO string completo
       const startIso = val.startDate ? DateUtils.monthFormatToIso(val.startDate) : '';
       const endIso = val.isCurrent ? null : (val.endDate ? DateUtils.monthFormatToIso(val.endDate) : null);
-      
-      // eslint-disable-next-line no-console
-      console.log(`[Mapper] toSaveDto - exp ${index} dates: startIso=${startIso}, endIso=${endIso}`);
-      
       return {
         company: (val.company || '').trim(),
         role: (val.jobTitle || '').trim(),
@@ -111,8 +90,6 @@ export class OnboardingMapper {
       data
     };
 
-    // eslint-disable-next-line no-console
-    console.log('[OnboardingMapper] DTO construido:', JSON.stringify(dto, null, 2));
     return dto;
   }
 }

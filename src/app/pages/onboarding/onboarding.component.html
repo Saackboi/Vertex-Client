@@ -70,98 +70,102 @@
         <div class="hero-icon">
           <span nz-icon nzType="check-circle" nzTheme="fill"></span>
         </div>
-        <h1 class="hero-title">¡Perfil Completado!</h1>
-        <p class="hero-description">
-          Tu perfil profesional está listo y visible para reclutadores.
-        </p>
+        <div class="hero-text">
+          <h1 class="hero-title">¡Perfil Completado!</h1>
+          <p class="hero-description">
+            Tu perfil profesional está listo y visible para reclutadores.
+          </p>
+        </div>
       </div>
 
-      <!-- Profile Summary Card -->
-      <div class="profile-summary-card">
-        <div class="summary-header">
-          <h2 class="summary-title">
-            <span nz-icon nzType="user" nzTheme="outline"></span>
-            Resumen de tu Perfil
-          </h2>
+      <div class="profile-bento">
+        <div class="bento-card bento-summary">
+          <div class="bento-title">
+            <span nz-icon nzType="idcard" nzTheme="outline"></span>
+            Resumen profesional
+          </div>
+          <h3 class="bento-name">{{ accountForm.get('fullName')?.value || 'No especificado' }}</h3>
+          <p class="bento-text">
+            {{ accountForm.get('summary')?.value || 'No especificado' }}
+          </p>
         </div>
 
-        <div class="summary-content">
-          <!-- Información Personal -->
-          <div class="info-section">
-            <h3 class="section-label">
-              <span nz-icon nzType="idcard" nzTheme="outline"></span>
-              Información Personal
-            </h3>
-            <div class="info-grid">
-              <div class="info-item">
-                <span class="info-label">Nombre:</span>
-                <span class="info-value">{{ accountForm.get('fullName')?.value || 'No especificado' }}</span>
-              </div>
-              <div class="info-item full-width">
-                <span class="info-label">Resumen Profesional:</span>
-                <p class="info-value summary-text">{{ accountForm.get('summary')?.value || 'No especificado' }}</p>
-              </div>
+        <div class="bento-card bento-stats">
+          <div class="bento-title">
+            <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+            Estado del perfil
+          </div>
+          <div class="bento-stat-grid">
+            <div class="bento-stat">
+              <span class="stat-label">Experiencias</span>
+              <span class="stat-value">{{ experiences.length }}</span>
+            </div>
+            <div class="bento-stat">
+              <span class="stat-label">Habilidades</span>
+              <span class="stat-value">{{ skills.length }}</span>
             </div>
           </div>
+        </div>
 
-          <!-- Experiencia -->
+        <div class="bento-card bento-experience">
+          <div class="bento-title">
+            <span nz-icon nzType="solution" nzTheme="outline"></span>
+            Experiencia Laboral
+          </div>
           @if (experiences.length > 0) {
-            <div class="info-section">
-              <h3 class="section-label">
-                <span nz-icon nzType="solution" nzTheme="outline"></span>
-                Experiencia Laboral ({{ experiences.length }})
-              </h3>
-              <div class="experience-list">
-                @for (exp of experiences.controls; track $index) {
-                  <div class="experience-item">
-                    <div class="exp-header">
-                      <span class="exp-role">{{ exp.get('jobTitle')?.value }}</span>
-                      <span class="exp-company">{{ exp.get('company')?.value }}</span>
-                    </div>
-                    <div class="exp-dates">
-                      <span nz-icon nzType="calendar" nzTheme="outline"></span>
-                      {{ exp.get('startDate')?.value || 'Fecha no especificada' }}
-                      -
-                      {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fecha no especificada') }}
-                    </div>
-                    @if (exp.get('description')?.value) {
-                      <p class="exp-description">{{ exp.get('description')?.value }}</p>
-                    }
+            <div class="bento-experience-list">
+              @for (exp of experiences.controls; track $index) {
+                <div class="bento-exp-item">
+                  <div class="bento-exp-main">
+                    <span class="bento-exp-role">{{ exp.get('jobTitle')?.value || 'Sin titulo' }}</span>
+                    <span class="bento-exp-company">{{ exp.get('company')?.value || 'Sin empresa' }}</span>
                   </div>
-                }
-              </div>
+                  <span class="bento-exp-date">
+                    {{ exp.get('startDate')?.value || 'Inicio' }} -
+                    {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fin') }}
+                  </span>
+                </div>
+              }
             </div>
+          } @else {
+            <p class="bento-empty">No hay experiencias registradas.</p>
           }
+        </div>
 
-          <!-- Habilidades -->
+        <div class="bento-card bento-skills">
+          <div class="bento-title">
+            <span nz-icon nzType="tags" nzTheme="outline"></span>
+            Habilidades
+          </div>
           @if (skills && skills.length > 0) {
-            <div class="info-section">
-              <h3 class="section-label">
-                <span nz-icon nzType="tags" nzTheme="outline"></span>
-                Habilidades ({{ skills.length }})
-              </h3>
-              <div class="skills-tags">
-                @for (skill of skills; track skill) {
-                  <span class="skill-tag">{{ skill }}</span>
-                }
-              </div>
+            <div class="bento-skills-tags">
+              @for (skill of skills; track skill) {
+                <span class="bento-skill">{{ skill }}</span>
+              }
             </div>
+          } @else {
+            <p class="bento-empty">Agrega habilidades para destacar tu perfil.</p>
           }
         </div>
 
-        <!-- Action Buttons -->
-        <div class="summary-actions">
-          <button nz-button nzType="primary" nzSize="large" (click)="navigateToDashboard()">
+        <div class="bento-card bento-actions">
+          <div class="bento-title">
             <span nz-icon nzType="home" nzTheme="outline"></span>
-            Ir al Dashboard
+            Acciones rápidas
+          </div>
+          <button nz-button nzType="primary" nzSize="large" (click)="navigateToDashboard()">
+            Ir al inicio
           </button>
+          <p class="bento-hint">Puedes volver a editar tu perfil cuando quieras.</p>
         </div>
-      </div>
 
-      <!-- Info Footer -->
-      <div class="info-footer">
-        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
-        <p>¿Necesitas hacer cambios? Puedes editar tu perfil en cualquier momento desde la sección de <strong>Perfil</strong>.</p>
+        <div class="bento-card bento-info">
+          <div class="bento-title">
+            <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+            Consejo
+          </div>
+          <p>¿Necesitas hacer cambios? Puedes editar tu perfil en cualquier momento desde la sección de <strong>Perfil</strong>.</p>
+        </div>
       </div>
     </div>
   }
@@ -233,14 +237,15 @@
       <h2 class="form-title">Información Personal</h2>
       
       <!-- Alerta de ayuda -->
-      <nz-alert
-        nzType="info"
-        nzMessage="Completa tu perfil profesional"
-        nzDescription="Esta información ayudará a los reclutadores a conocerte mejor. Sé claro y conciso."
-        nzShowIcon
-        nzCloseable
-        style="margin-bottom: 1.5rem;"
-      ></nz-alert>
+      <div class="form-alert">
+        <nz-alert
+          nzType="info"
+          nzMessage="Completa tu perfil profesional"
+          nzDescription="Esta información ayudará a los reclutadores a conocerte mejor. Sé claro y conciso."
+          nzShowIcon
+          nzCloseable
+        ></nz-alert>
+      </div>
 
       <form [formGroup]="accountForm" class="account-form">
         <!-- Row 1: Nombre Completo -->
@@ -275,10 +280,10 @@
                 {{ getErrorMessage(accountForm, 'summary') }}
               </div>
             }
-            <span class="char-count" [class.warning]="(accountForm.get('summary')?.value?.length || 0) < 50">
+            <span class="char-count" [class.warning]="(accountForm.get('summary')?.value?.length || 0) < 10">
               {{ accountForm.get('summary')?.value?.length || 0 }} / 500 caracteres
-              @if ((accountForm.get('summary')?.value?.length || 0) < 50) {
-                <span class="min-chars">(mínimo 50)</span>
+              @if ((accountForm.get('summary')?.value?.length || 0) < 10) {
+                <span class="min-chars">(mínimo 10)</span>
               }
             </span>
           </div>
@@ -286,7 +291,7 @@
 
         <!-- Submit Button -->
         <div class="form-actions">
-          <button type="button" class="submit-button" (click)="saveAndContinue()" [disabled]="accountForm.invalid || (isLoading$ | async)">
+          <button type="button" class="submit-button" (click)="saveAndContinue()" [disabled]="accountForm.invalid || isSummaryTooShort || (isLoading$ | async)">
             Guardar y Siguiente
             <span nz-icon nzType="arrow-right" nzTheme="outline"></span>
           </button>
@@ -312,105 +317,33 @@
       ></nz-alert>
 
       <form [formGroup]="experienceForm">
-        <div formArrayName="experiences" class="experiences-list">
+        <div class="experience-list-compact">
+          @if (experiences.length === 0) {
+            <div class="experience-empty">
+              Aún no agregas experiencias. Usa el boton para crear una nueva.
+            </div>
+          }
           @for (exp of experiences.controls; track $index; let i = $index) {
-            <div [formGroupName]="i" class="experience-card">
-              <div class="experience-indicator"></div>
-              
-              <div class="experience-content">
-                <div class="experience-fields">
-                  <div class="field-row">
-                    <div class="form-field">
-                      <label class="field-label">Título del Puesto <span class="required">*</span></label>
-                      <input 
-                        type="text" 
-                        formControlName="jobTitle" 
-                        class="field-input" 
-                        [class.error]="hasExperienceError(i, 'jobTitle')"
-                        placeholder="Ingeniero de Software Senior" />
-                      @if (hasExperienceError(i, 'jobTitle')) {
-                        <div class="error-message-inline">
-                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
-                          {{ getExperienceErrorMessage(i, 'jobTitle') }}
-                        </div>
-                      }
-                    </div>
-                    <div class="form-field">
-                      <label class="field-label">Empresa <span class="required">*</span></label>
-                      <input 
-                        type="text" 
-                        formControlName="company" 
-                        class="field-input" 
-                        [class.error]="hasExperienceError(i, 'company')"
-                        placeholder="Tech Solutions Inc." />
-                      @if (hasExperienceError(i, 'company')) {
-                        <div class="error-message-inline">
-                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
-                          {{ getExperienceErrorMessage(i, 'company') }}
-                        </div>
-                      }
-                    </div>
-                  </div>
-
-                  <div class="field-row date-row">
-                    <div class="form-field">
-                      <label class="field-label">Fecha de Inicio <span class="required">*</span></label>
-                      <input 
-                        type="month" 
-                        formControlName="startDate" 
-                        class="field-input"
-                        [class.error]="hasExperienceError(i, 'startDate')" />
-                      @if (hasExperienceError(i, 'startDate')) {
-                        <div class="error-message-inline">
-                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
-                          {{ getExperienceErrorMessage(i, 'startDate') }}
-                        </div>
-                      }
-                    </div>
-                    <div class="form-field">
-                      <label class="field-label">Fecha de Fin</label>
-                      <input 
-                        type="month" 
-                        formControlName="endDate" 
-                        class="field-input" />
-                    </div>
-                  </div>
-
-                  <div class="checkbox-field">
-                    <label class="checkbox-label">
-                      <input type="checkbox" formControlName="isCurrent" class="field-checkbox" />
-                      <span>Trabajo actual</span>
-                    </label>
-                  </div>
-
-                  <div class="form-field">
-                    <label class="field-label">Descripción <span class="required">*</span></label>
-                    <textarea 
-                      formControlName="description" 
-                      class="field-textarea" 
-                      [class.error]="hasExperienceError(i, 'description')"
-                      rows="3" 
-                      placeholder="Describe tus responsabilidades y logros..."></textarea>
-                    <div class="field-footer">
-                      @if (hasExperienceError(i, 'description')) {
-                        <div class="error-message-inline">
-                          <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
-                          {{ getExperienceErrorMessage(i, 'description') }}
-                        </div>
-                      }
-                      <span class="char-count-small">
-                        {{ exp.get('description')?.value?.length || 0 }} / 500
-                      </span>
-                    </div>
-                  </div>
+            <div class="experience-row" [class.incomplete]="exp.invalid">
+              <div class="experience-main">
+                <div class="experience-title">
+                  {{ exp.get('jobTitle')?.value || 'Sin titulo' }}
+                  @if (exp.invalid) {
+                    <span class="exp-status pending">Pendiente</span>
+                  }
                 </div>
-
-                <div class="experience-actions">
-                  <button type="button" class="action-button delete" (click)="removeExperience(i)">
-                    <span nz-icon nzType="delete" nzTheme="outline"></span>
-                    Eliminar
-                  </button>
+                <div class="experience-meta">
+                  <span>{{ exp.get('company')?.value || 'Sin empresa' }}</span>
+                  <span>•</span>
+                  <span>
+                    {{ exp.get('startDate')?.value || 'Inicio' }} -
+                    {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fin') }}
+                  </span>
                 </div>
+              </div>
+              <div class="experience-actions-compact">
+                <button type="button" class="action-link edit" (click)="openExperienceModal(i)">Editar</button>
+                <button type="button" class="action-link delete" (click)="removeExperience(i)">Eliminar</button>
               </div>
             </div>
           }
@@ -421,6 +354,106 @@
           Agregar experiencia
         </button>
       </form>
+
+      <nz-modal
+        [(nzVisible)]="isExperienceModalVisible"
+        nzTitle="Experiencia laboral"
+        (nzOnCancel)="closeExperienceModal()"
+        [nzFooter]="experienceModalFooter">
+        <ng-container *nzModalContent>
+          @if (experienceModalForm) {
+            <form [formGroup]="experienceModalForm" class="experience-modal-form">
+              <div class="field-row">
+                <div class="form-field">
+                  <label class="field-label">Título del Puesto <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="jobTitle"
+                    class="field-input"
+                    [class.error]="hasError(experienceModalForm, 'jobTitle')"
+                    placeholder="Ingeniero de Software Senior" />
+                  @if (hasError(experienceModalForm, 'jobTitle')) {
+                    <div class="error-message-inline">
+                      <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                      {{ getErrorMessage(experienceModalForm, 'jobTitle') }}
+                    </div>
+                  }
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Empresa <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    formControlName="company"
+                    class="field-input"
+                    [class.error]="hasError(experienceModalForm, 'company')"
+                    placeholder="Tech Solutions Inc." />
+                  @if (hasError(experienceModalForm, 'company')) {
+                    <div class="error-message-inline">
+                      <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                      {{ getErrorMessage(experienceModalForm, 'company') }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="field-row date-row">
+                <div class="form-field">
+                  <label class="field-label">Fecha de Inicio <span class="required">*</span></label>
+                  <input
+                    type="month"
+                    formControlName="startDate"
+                    class="field-input"
+                    [class.error]="hasError(experienceModalForm, 'startDate')" />
+                  @if (hasError(experienceModalForm, 'startDate')) {
+                    <div class="error-message-inline">
+                      <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                      {{ getErrorMessage(experienceModalForm, 'startDate') }}
+                    </div>
+                  }
+                </div>
+                <div class="form-field">
+                  <label class="field-label">Fecha de Fin</label>
+                  <input type="month" formControlName="endDate" class="field-input" />
+                </div>
+              </div>
+
+              <div class="checkbox-field">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="isCurrent" class="field-checkbox" />
+                  <span>Trabajo actual</span>
+                </label>
+              </div>
+
+              <div class="form-field">
+                <label class="field-label">Descripción <span class="required">*</span></label>
+                <textarea
+                  formControlName="description"
+                  class="field-textarea"
+                  [class.error]="hasError(experienceModalForm, 'description')"
+                  rows="3"
+                  placeholder="Describe tus responsabilidades y logros..."></textarea>
+                <div class="field-footer">
+                  @if (hasError(experienceModalForm, 'description')) {
+                    <div class="error-message-inline">
+                      <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                      {{ getErrorMessage(experienceModalForm, 'description') }}
+                    </div>
+                  }
+                  <span class="char-count-small">
+                    {{ experienceModalForm.get('description')?.value?.length || 0 }} / 500
+                  </span>
+                </div>
+              </div>
+            </form>
+          }
+        </ng-container>
+      </nz-modal>
+      <ng-template #experienceModalFooter>
+        <button nz-button nzType="default" (click)="closeExperienceModal()">Cancelar</button>
+        <button nz-button nzType="primary" (click)="saveExperienceModal()" [disabled]="experienceModalForm.invalid">
+          Guardar experiencia
+        </button>
+      </ng-template>
 
       <!-- Habilidades -->
       <h2 class="step-section-title">Habilidades</h2>
@@ -464,67 +497,80 @@
   @if ((currentStep$ | async)! === 2) {
     <div class="review-container">
       <div class="review-grid">
-        <!-- Columna izquierda: CV Preview -->
         <div class="cv-preview">
-          <div class="cv-header">
-            <h2 class="cv-title">Resumen de tu Perfil</h2>
-            <p class="cv-subtitle">Vista previa de tu información profesional</p>
-          </div>
-
-          <div class="cv-content">
-            <!-- Información Personal -->
-            <section class="cv-section">
-              <h3 class="cv-section-title">INFORMACIÓN PERSONAL</h3>
-              <div class="cv-info-grid">
-                <div class="cv-info-item">
-                  <p class="cv-info-label">Nombre Completo</p>
-                  <p class="cv-info-value">{{ accountForm.get('fullName')?.value }}</p>
+          <div class="cv-sheet">
+            <div class="cv-sheet-content">
+              <div class="cv-header">
+                <div class="cv-photo">
+                  <span nz-icon nzType="user" nzTheme="outline"></span>
+                </div>
+                <div class="cv-header-info">
+                  <h2 class="cv-name">{{ accountForm.get('fullName')?.value || 'Tu Nombre' }}</h2>
+                  <p class="cv-role">
+                    {{ ((resumeData.experiences && resumeData.experiences.length > 0) ? (resumeData.experiences[0].jobTitle || resumeData.experiences[0].position) : '') || 'Perfil profesional' }}
+                  </p>
+                  <p class="cv-subline">Perfil generado en Vertex</p>
                 </div>
               </div>
-              <div class="cv-summary">
-                <p class="cv-info-label">Resumen Profesional</p>
-                <p class="cv-info-value">{{ accountForm.get('summary')?.value }}</p>
-              </div>
-            </section>
 
-            <!-- Experiencia Laboral -->
-            <section class="cv-section">
-              <h3 class="cv-section-title">EXPERIENCIA LABORAL</h3>
-              <div class="cv-experience-list">
-                @for (exp of (resumeData.experiences || []); track $index; let i = $index) {
-                  <div class="cv-experience-item" [class.first]="i === 0">
-                    <div class="cv-exp-header">
-                      <h4 class="cv-exp-title">{{ (exp.jobTitle || exp.position) || 'Sin título' }}</h4>
-                      <span class="cv-exp-date">
-                        @if (exp.startDate) {
-                          {{ exp.startDate | date: 'MMM yyyy' }}
-                        } @else {
-                          Fecha inicio
-                        }
-                        -
-                        @if (exp.isCurrent) {
-                          Presente
-                        } @else if (exp.endDate) {
-                          {{ exp.endDate | date: 'MMM yyyy' }}
-                        } @else {
-                          Fecha fin
-                        }
-                      </span>
+              <section class="cv-section">
+                <h3 class="cv-section-title">Resumen profesional</h3>
+                <p class="cv-text">{{ accountForm.get('summary')?.value || 'Agrega un resumen profesional para destacar tu perfil.' }}</p>
+              </section>
+
+              <section class="cv-section">
+                <h3 class="cv-section-title">Experiencia</h3>
+                <div class="cv-experience-list">
+                  @for (exp of (resumeData.experiences || []); track $index; let i = $index) {
+                    <div class="cv-entry" [class.first]="i === 0">
+                      <div class="cv-entry-header">
+                        <div class="cv-entry-title">
+                          <span class="cv-entry-role">{{ (exp.jobTitle || exp.position) || 'Sin título' }}</span>
+                          <span class="cv-entry-company">{{ exp.company || 'Sin empresa' }}</span>
+                        </div>
+                        <span class="cv-entry-date">
+                          @if (exp.startDate) {
+                            {{ exp.startDate | date: 'MMM yyyy' }}
+                          } @else {
+                            Fecha inicio
+                          }
+                          -
+                          @if (exp.isCurrent) {
+                            Presente
+                          } @else if (exp.endDate) {
+                            {{ exp.endDate | date: 'MMM yyyy' }}
+                          } @else {
+                            Fecha fin
+                          }
+                        </span>
+                      </div>
+                      @if (exp.description) {
+                        <p class="cv-entry-description">{{ exp.description }}</p>
+                      }
                     </div>
-                    <p class="cv-exp-company">{{ exp.company || 'Sin empresa' }}</p>
-                    @if (exp.description) {
-                      <p class="cv-exp-description">{{ exp.description }}</p>
-                    }
-                  </div>
-                }
-              </div>
-            </section>
+                  }
+                  @if ((resumeData.experiences || []).length === 0) {
+                    <p class="cv-empty">Agrega experiencia para verla reflejada aqui.</p>
+                  }
+                </div>
+              </section>
+
+              <section class="cv-section">
+                <h3 class="cv-section-title">Habilidades</h3>
+                <div class="cv-skills">
+                  @for (skill of skills; track skill) {
+                    <span class="cv-skill-tag">{{ skill }}</span>
+                  }
+                  @if (skills.length === 0) {
+                    <span class="cv-empty">Agrega habilidades para destacarlas.</span>
+                  }
+                </div>
+              </section>
+            </div>
           </div>
         </div>
 
-        <!-- Columna derecha: Resumen Cards -->
         <div class="summary-sidebar">
-          <!-- Card: Información Personal -->
           <div class="summary-card">
             <h3 class="summary-card-title">Información Personal</h3>
             <div class="summary-card-content">
@@ -535,7 +581,6 @@
             </div>
           </div>
 
-          <!-- Card: Experiencia Laboral -->
           <div class="summary-card">
             <h3 class="summary-card-title">Experiencia Laboral</h3>
             <div class="summary-card-content">
@@ -548,7 +593,6 @@
             </div>
           </div>
 
-          <!-- Card: Habilidades -->
           <div class="summary-card">
             <h3 class="summary-card-title">Habilidades</h3>
             <div class="summary-skills">
@@ -558,7 +602,6 @@
             </div>
           </div>
 
-          <!-- Botones de navegación -->
           <div class="review-actions">
             <button type="button" class="nav-button secondary full-width" (click)="previousStep()">
               Atrás
@@ -575,6 +618,6 @@
   </div>
   <!-- Fin Formularios de Onboarding -->
 
+  </main>
   <!-- Footer -->
   <app-footer />
-</main>

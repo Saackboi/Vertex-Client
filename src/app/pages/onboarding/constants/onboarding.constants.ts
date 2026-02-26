@@ -14,7 +14,7 @@ export const ONBOARDING_CONSTANTS = {
     1: 'Experiencia',
     2: 'Revisión'
   },
-  MIN_SUMMARY_LENGTH: 50,
+  MIN_SUMMARY_LENGTH: 10,
   MAX_SUMMARY_LENGTH: 500,
   MAX_SKILL_LENGTH: 30
 } as const;

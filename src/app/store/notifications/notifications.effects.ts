@@ -23,7 +23,7 @@ export class NotificationsEffects {
    */
   connectOnAuth$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.loginSuccess, AuthActions.registerSuccess),
+      ofType(AuthActions.loginSuccess, AuthActions.registerSuccess, AuthActions.restoreSession),
       map(({ token }) => NotificationsActions.connectNotificationHub({ token }))
     )
   );
@@ -71,6 +71,12 @@ export class NotificationsEffects {
           catchError(() => of(NotificationsActions.loadNotificationHistory({ notifications: [] })))
         )
       )
+    )
+  );
+
+  syncNotifications$ = createEffect(() =>
+    this.notificationHub.notifications$.pipe(
+      map((notifications) => NotificationsActions.loadNotificationHistory({ notifications }))
     )
   );
 

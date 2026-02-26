@@ -15,7 +15,7 @@ import { map } from 'rxjs/operators';
 import { selectIsAuthenticated, selectUserFullName } from '../../store/auth/auth.selectors';
 import { selectIsCompleted } from '../../store/onboarding/onboarding.selectors';
 import { selectOnboardingInProgress } from '../../store/onboarding/onboarding.inprogress.selector';
-import * as AuthActions from '../../store/auth/auth.actions';
+import * as OnboardingActions from '../../store/onboarding/onboarding.actions';
 import { NavigationUtils } from '../../core/utils/navigation.utils';
 
 @Component({
@@ -41,6 +41,8 @@ export class LandingComponent {
   private readonly router = inject(Router);
   private readonly store = inject(Store);
 
+  isDarkMode = document.documentElement.classList.contains('dark');
+
   readonly isAuthenticated$: Observable<boolean> = this.store.select(selectIsAuthenticated);
   readonly userFullName$: Observable<string> = this.store.select(selectUserFullName);
   readonly isCompleted$: Observable<boolean> = this.store.select(selectIsCompleted);
@@ -48,7 +50,6 @@ export class LandingComponent {
     map((val: unknown) => !!val)
   );
   
-  constructor() {}
 
   goToLogin(): void {
     NavigationUtils.goToLogin(this.router);
@@ -60,6 +61,11 @@ export class LandingComponent {
 
   goToLanding(): void {
     NavigationUtils.goToLanding(this.router);
+  }
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    document.documentElement.classList.toggle('dark', this.isDarkMode);
   }
 
   logout(): void {

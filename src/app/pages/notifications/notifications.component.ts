@@ -57,6 +57,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     // No necesitamos inicializar nada, el effect se encarga de conectar automáticamente
   }
 
@@ -79,7 +80,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/onboarding']);
+    NavigationUtils.goToOnboarding(this.router);
   }
 
   markAsRead(id: string): void {

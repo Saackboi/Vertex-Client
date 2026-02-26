@@ -53,12 +53,13 @@ export class OnboardingEffects {
   saveProgress$ = createEffect(() =>
     this.actions$.pipe(
       ofType(OnboardingActions.saveProgress),
-      exhaustMap(({ dto }) =>
+      exhaustMap(({ dto, silent }) =>
         this.onboardingService.saveProgress(dto).pipe(
-          map((data) => OnboardingActions.saveProgressSuccess({ data })),
+          map((data) => OnboardingActions.saveProgressSuccess({ data, silent })),
           catchError((error) =>
             of(OnboardingActions.saveProgressFailure({ 
-              error: this.errorHandler.getErrorMessage(error)
+              error: this.errorHandler.getErrorMessage(error),
+              silent
             }))
           )
         )
@@ -70,8 +71,10 @@ export class OnboardingEffects {
     () =>
       this.actions$.pipe(
         ofType(OnboardingActions.saveProgressSuccess),
-        tap(({ data }) => {
-          this.notificationService.showSuccess('Progreso guardado correctamente');
+        tap(({ data, silent }) => {
+          if (!silent) {
+            this.notificationService.showSuccess('Progreso guardado correctamente');
+          }
           // Si el step cambió, actualizar en el store
           if (data && data.currentStep !== undefined) {
             // La acción updateCurrentStep se despachará desde el componente
@@ -85,8 +88,8 @@ export class OnboardingEffects {
     () =>
       this.actions$.pipe(
         ofType(OnboardingActions.saveProgressFailure),
-        tap(({ error }) => {
-          if (error) {
+        tap(({ error, silent }) => {
+          if (error && !silent) {
             this.notificationService.showError(error);
           }
         })
