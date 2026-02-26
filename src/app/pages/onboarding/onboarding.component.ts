@@ -300,32 +300,55 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     });
   }
 
-  addSkill(event: KeyboardEvent): void {
-    const input = event.target as HTMLInputElement;
+  addSkill(eventOrInput: Event | KeyboardEvent | HTMLInputElement): void {
+    let input: HTMLInputElement | null = null;
+
+    if (eventOrInput instanceof KeyboardEvent) {
+      if (eventOrInput.key !== 'Enter') return;
+      input = eventOrInput.target as HTMLInputElement;
+    } else if (eventOrInput instanceof HTMLInputElement) {
+      input = eventOrInput;
+    } else {
+      const target = (eventOrInput as Event).target as HTMLInputElement | null;
+      if (target && (target as HTMLInputElement).value !== undefined) {
+        input = target;
+      }
+    }
+
+    if (!input) return;
     const skill = input.value.trim();
-    
-    if (event.key === 'Enter' && skill) {
-      if (skill.length < 2) {
-        this.message.warning('La habilidad debe tener al menos 2 caracteres');
-        event.preventDefault();
-        return;
+    if (!skill) return;
+
+    if (skill.length < 2) {
+      this.message.warning('La habilidad debe tener al menos 2 caracteres');
+      if (eventOrInput instanceof KeyboardEvent) {
+        eventOrInput.preventDefault();
       }
-      if (this.skills.includes(skill)) {
-        this.message.warning('Esta habilidad ya fue agregada');
-        event.preventDefault();
-        return;
+      return;
+    }
+    if (this.skills.includes(skill)) {
+      this.message.warning('Esta habilidad ya fue agregada');
+      if (eventOrInput instanceof KeyboardEvent) {
+        eventOrInput.preventDefault();
       }
-      if (this.skills.length >= 20) {
-        this.message.warning('Máximo 20 habilidades permitidas');
-        event.preventDefault();
-        return;
+      return;
+    }
+    if (this.skills.length >= 20) {
+      this.message.warning('Máximo 20 habilidades permitidas');
+      if (eventOrInput instanceof KeyboardEvent) {
+        eventOrInput.preventDefault();
       }
-      this.skills = [...this.skills, skill];
-      input.value = '';
-      this.message.success(`¡Habilidad "${skill}" agregada!`);
-      this.enableAutosave();
-      this.autosave$.next();
-      event.preventDefault();
+      return;
+    }
+
+    this.skills = [...this.skills, skill];
+    input.value = '';
+    this.message.success(`¡Habilidad "${skill}" agregada!`);
+    this.enableAutosave();
+    this.autosave$.next();
+
+    if (eventOrInput instanceof KeyboardEvent) {
+      eventOrInput.preventDefault();
     }
   }
 

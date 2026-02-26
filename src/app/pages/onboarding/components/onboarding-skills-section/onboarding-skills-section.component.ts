@@ -16,7 +16,7 @@ export class OnboardingSkillsSectionComponent {
   @Input() skills: string[] = [];
   @Input() isLoading$!: Observable<boolean>;
 
-  @Output() addSkill = new EventEmitter<KeyboardEvent>();
+  @Output() addSkill = new EventEmitter<Event | KeyboardEvent | HTMLInputElement>();
   @Output() removeSkill = new EventEmitter<string>();
   @Output() saveAndContinue = new EventEmitter<void>();
   @Output() previousStep = new EventEmitter<void>();

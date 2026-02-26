@@ -15,12 +15,12 @@
         <span nz-icon nzType="arrow-left" nzTheme="outline"></span>
       </button>
       <h1 class="page-title">Notificaciones</h1>
+      @if ((unreadCount$ | async) ?? 0 > 0) {
+        <div class="unread-badge">
+          {{ (unreadCount$ | async) ?? 0 }} sin leer
+        </div>
+      }
     </div>
-    @if ((unreadCount$ | async) ?? 0 > 0) {
-      <div class="unread-badge">
-        {{ (unreadCount$ | async) ?? 0 }} sin leer
-      </div>
-    }
     @if ((unreadCount$ | async) ?? 0 > 0) {
       <button class="mark-all-read-button" (click)="markAllAsRead()">
         Marcar todas como leídas
