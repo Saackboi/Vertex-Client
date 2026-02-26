@@ -64,8 +64,20 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       }
 
       .cv-sheet-content {
-        padding: 2rem 1.5rem;
-        min-height: 960px;
+        padding: 1.5rem 1.25rem;
+        min-height: 0;
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .cv-sheet {
+        border-radius: 10px;
+      }
+
+      .cv-sheet-content {
+        padding: 1.25rem 1rem;
+        gap: 1rem;
       }
     }
 
@@ -82,6 +94,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       .cv-header {
         grid-template-columns: 1fr;
         text-align: center;
+        gap: 1.25rem;
       }
     }
 
@@ -99,6 +112,14 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       flex-shrink: 0;
     }
 
+    @media (max-width: 640px) {
+      .cv-photo {
+        width: 100px;
+        height: 130px;
+        margin: 0 auto;
+      }
+    }
+
     .cv-header-info {
       display: flex;
       flex-direction: column;
@@ -114,6 +135,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       overflow-wrap: anywhere;
     }
 
+    @media (max-width: 640px) {
+      .cv-name {
+        font-size: 1.6rem;
+      }
+    }
+
     .cv-role {
       font-size: 1rem;
       font-weight: 600;
@@ -123,16 +150,34 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       letter-spacing: 0.08em;
     }
 
+    @media (max-width: 640px) {
+      .cv-role {
+        font-size: 0.85rem;
+      }
+    }
+
     .cv-subline {
       font-size: 0.95rem;
       color: var(--onboarding-muted);
       margin: 0;
     }
 
+    @media (max-width: 640px) {
+      .cv-subline {
+        font-size: 0.85rem;
+      }
+    }
+
     .cv-section {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      .cv-section {
+        gap: 0.5rem;
+      }
     }
 
     .cv-section-title {
@@ -146,6 +191,12 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       border-bottom: 1px solid rgba(67, 160, 71, 0.2);
     }
 
+    @media (max-width: 640px) {
+      .cv-section-title {
+        font-size: 0.8rem;
+      }
+    }
+
     .cv-text {
       font-size: 0.98rem;
       color: var(--onboarding-muted);
@@ -155,15 +206,33 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     }
 
+    @media (max-width: 640px) {
+      .cv-text {
+        font-size: 0.9rem;
+      }
+    }
+
     .cv-experience-list {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
 
+    @media (max-width: 640px) {
+      .cv-experience-list {
+        gap: 1rem;
+      }
+    }
+
     .cv-entry {
       padding-top: 1.5rem;
       border-top: 1px solid var(--onboarding-border);
+    }
+
+    @media (max-width: 640px) {
+      .cv-entry {
+        padding-top: 1rem;
+      }
     }
 
     .cv-entry.first {
@@ -220,6 +289,13 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       white-space: nowrap;
     }
 
+    @media (max-width: 640px) {
+      .cv-entry-date {
+        white-space: normal;
+        padding: 0.35rem 0.6rem;
+      }
+    }
+
     .cv-entry-description {
       font-size: 0.95rem;
       color: var(--onboarding-muted);
@@ -229,10 +305,22 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     }
 
+    @media (max-width: 640px) {
+      .cv-entry-description {
+        font-size: 0.9rem;
+      }
+    }
+
     .cv-skills {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .cv-skills {
+        gap: 0.4rem;
+      }
     }
 
     .cv-skill-tag {
@@ -243,6 +331,13 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
       border-radius: 9999px;
       font-size: 0.85rem;
       font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .cv-skill-tag {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.78rem;
+      }
     }
 
     .cv-empty {
