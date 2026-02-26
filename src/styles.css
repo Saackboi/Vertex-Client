@@ -1,18 +1,18 @@
 /* You can add global styles to this file, and also import other style files */
 
 /* Importar estilos de Ng-Zorro (on-demand) */
-@import "ng-zorro-antd/style/index.css";
-@import "ng-zorro-antd/alert/style/index.css";
-@import "ng-zorro-antd/avatar/style/index.css";
-@import "ng-zorro-antd/badge/style/index.css";
-@import "ng-zorro-antd/button/style/index.css";
-@import "ng-zorro-antd/dropdown/style/index.css";
-@import "ng-zorro-antd/form/style/index.css";
-@import "ng-zorro-antd/icon/style/index.css";
-@import "ng-zorro-antd/input/style/index.css";
-@import "ng-zorro-antd/menu/style/index.css";
-@import "ng-zorro-antd/message/style/index.css";
-@import "ng-zorro-antd/modal/style/index.css";
+@import "../node_modules/ng-zorro-antd/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/alert/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/avatar/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/badge/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/button/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/dropdown/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/form/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/icon/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/input/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/menu/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/message/style/index.min.css";
+@import "../node_modules/ng-zorro-antd/modal/style/index.min.css";
 
 /* Reset y estilos globales */
 * {
