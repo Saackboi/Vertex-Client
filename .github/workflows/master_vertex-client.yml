@@ -26,6 +26,11 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install
+          
+          # ---> INYECCIÓN DE VARIABLES DE ENTORNO <---
+          sed -i 's|URL_DE_LA_API|${{ secrets.API_URL }}|g' src/environments/environment.ts
+          sed -i 's|URL_DEL_SERVIDOR_SIGNALR|${{ secrets.SIGNALR_URL }}|g' src/environments/environment.ts
+          
           npm run build --if-present
           npm run test --if-present
 
@@ -62,4 +67,3 @@ jobs:
           app-name: 'vertex-client'
           slot-name: 'Production'
           package: .
-          
