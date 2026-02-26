@@ -1,0 +1,46 @@
+<header class="header">
+  <nav class="nav-container">
+    <div class="nav-left">
+      <app-logo route="/" />
+      <div class="nav-links">
+        <a class="nav-link active" href="#">Inicio</a>
+        <a class="nav-link" href="#caracteristicas">Características</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" (click)="toggleTheme.emit()" aria-label="Cambiar tema">
+        <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+      </button>
+      @if (isAuthenticated$ | async) {
+        <button nz-button nzType="primary" class="dashboard-button" (click)="goToOnboarding.emit()">
+          Ir a mi Perfil
+        </button>
+        <nz-avatar
+          nz-dropdown
+          [nzDropdownMenu]="userMenu"
+          nzPlacement="bottomRight"
+          nzIcon="user"
+          [nzSize]="32"
+          class="user-avatar">
+        </nz-avatar>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item>
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              {{ userFullName$ | async }}
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout.emit()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Cerrar Sesión
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      } @else {
+        <button nz-button nzType="default" class="login-button" (click)="goToLogin.emit()">
+          Iniciar Sesión
+        </button>
+      }
+    </div>
+  </nav>
+</header>

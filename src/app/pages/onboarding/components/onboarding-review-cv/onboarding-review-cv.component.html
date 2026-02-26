@@ -1,0 +1,72 @@
+<div class="cv-preview">
+  <div class="cv-sheet">
+    <div class="cv-sheet-content">
+      <div class="cv-header">
+        <div class="cv-photo">
+          <span nz-icon nzType="user" nzTheme="outline"></span>
+        </div>
+        <div class="cv-header-info">
+          <h2 class="cv-name">{{ accountForm.get('fullName')?.value || 'Tu Nombre' }}</h2>
+          <p class="cv-role">
+            {{ ((resumeData.experiences && resumeData.experiences.length > 0) ? (resumeData.experiences[0].jobTitle || resumeData.experiences[0].position) : '') || 'Perfil profesional' }}
+          </p>
+          <p class="cv-subline">Perfil generado en Vertex</p>
+        </div>
+      </div>
+
+      <section class="cv-section">
+        <h3 class="cv-section-title">Resumen profesional</h3>
+        <p class="cv-text">{{ accountForm.get('summary')?.value || 'Agrega un resumen profesional para destacar tu perfil.' }}</p>
+      </section>
+
+      <section class="cv-section">
+        <h3 class="cv-section-title">Experiencia</h3>
+        <div class="cv-experience-list">
+          @for (exp of (resumeData.experiences || []); track $index; let i = $index) {
+            <div class="cv-entry" [class.first]="i === 0">
+              <div class="cv-entry-header">
+                <div class="cv-entry-title">
+                  <span class="cv-entry-role">{{ (exp.jobTitle || exp.position) || 'Sin título' }}</span>
+                  <span class="cv-entry-company">{{ exp.company || 'Sin empresa' }}</span>
+                </div>
+                <span class="cv-entry-date">
+                  @if (exp.startDate) {
+                    {{ exp.startDate | date: 'MMM yyyy' }}
+                  } @else {
+                    Fecha inicio
+                  }
+                  -
+                  @if (exp.isCurrent) {
+                    Presente
+                  } @else if (exp.endDate) {
+                    {{ exp.endDate | date: 'MMM yyyy' }}
+                  } @else {
+                    Fecha fin
+                  }
+                </span>
+              </div>
+              @if (exp.description) {
+                <p class="cv-entry-description">{{ exp.description }}</p>
+              }
+            </div>
+          }
+          @if ((resumeData.experiences || []).length === 0) {
+            <p class="cv-empty">Agrega experiencia para verla reflejada aqui.</p>
+          }
+        </div>
+      </section>
+
+      <section class="cv-section">
+        <h3 class="cv-section-title">Habilidades</h3>
+        <div class="cv-skills">
+          @for (skill of skills; track skill) {
+            <span class="cv-skill-tag">{{ skill }}</span>
+          }
+          @if (skills.length === 0) {
+            <span class="cv-empty">Agrega habilidades para destacarlas.</span>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

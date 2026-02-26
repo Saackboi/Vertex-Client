@@ -1,0 +1,40 @@
+<div class="step-container">
+  <h2 class="step-section-title">Experiencia Laboral</h2>
+
+  <nz-alert
+    nzType="info"
+    nzMessage="Agrega tu experiencia profesional"
+    nzDescription="Incluye al menos una experiencia laboral. Sé específico con tus responsabilidades y logros."
+    nzShowIcon
+    nzCloseable
+    style="margin-bottom: 1.5rem;"
+  ></nz-alert>
+
+  <app-onboarding-experience-list
+    [experiences]="experiences"
+    (addExperience)="addExperience.emit()"
+    (openExperienceModal)="openExperienceModal.emit($event)"
+    (removeExperience)="removeExperience.emit($event)"
+  />
+
+  <app-onboarding-experience-modal
+    [experienceModalForm]="experienceModalForm"
+    [isExperienceModalVisible]="isExperienceModalVisible"
+    [hasError]="hasError"
+    [getErrorMessage]="getErrorMessage"
+    (closeExperienceModal)="closeExperienceModal.emit()"
+    (saveExperienceModal)="saveExperienceModal.emit()"
+  />
+
+  <h2 class="step-section-title">Habilidades</h2>
+
+  <app-onboarding-skills-section
+    [experienceForm]="experienceForm"
+    [skills]="skills"
+    [isLoading$]="isLoading$"
+    (addSkill)="addSkill.emit($event)"
+    (removeSkill)="removeSkill.emit($event)"
+    (saveAndContinue)="saveAndContinue.emit()"
+    (previousStep)="previousStep.emit()"
+  />
+</div>

@@ -1,0 +1,114 @@
+.cta-section {
+  padding: 6rem 0;
+  background: var(--landing-surface);
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--landing-border);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+:host-context(.dark) .cta-section {
+  background: var(--landing-surface);
+  border-top-color: rgba(148, 163, 184, 0.15);
+  border-bottom-color: rgba(148, 163, 184, 0.1);
+}
+
+.cta-section::before,
+.cta-section::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0.15;
+  background: var(--cta-accent);
+}
+
+.cta-section::before {
+  width: 240px;
+  height: 240px;
+  top: -80px;
+  left: -80px;
+}
+
+.cta-section::after {
+  width: 180px;
+  height: 180px;
+  bottom: -60px;
+  right: 12%;
+}
+
+.cta-container {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-card {
+  background: var(--cta-bg);
+  border-radius: 1.75rem;
+  padding: 3.5rem 3rem;
+  text-align: left;
+  color: var(--cta-text);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--cta-border);
+  box-shadow: var(--cta-shadow);
+  display: grid;
+  gap: 1.5rem;
+}
+
+.cta-glow {
+  position: absolute;
+  inset: 10px;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(67, 160, 71, 0.3);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.cta-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 768px) {
+  .cta-title {
+    font-size: 2.5rem;
+  }
+}
+
+.cta-subtitle {
+  color: var(--cta-muted);
+  font-size: 1.125rem;
+  margin: 0;
+  position: relative;
+  z-index: 10;
+  max-width: 34rem;
+}
+
+.cta-button {
+  width: fit-content !important;
+  height: auto !important;
+  font-size: 1rem !important;
+  background: var(--cta-accent) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 0.95rem 2.75rem !important;
+  border-radius: 0.85rem !important;
+  transition: all 0.2s !important;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 12px 30px rgba(67, 160, 71, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.cta-button:hover {
+  background: #4caf50 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 36px rgba(67, 160, 71, 0.4) !important;
+}

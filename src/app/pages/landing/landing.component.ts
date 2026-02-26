@@ -3,14 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { AppLogoComponent } from '../../components/app-logo.component';
 import { AppFooterComponent } from '../../components/app-footer.component';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-// import { NzDropdownMenuComponent, NzDropdownDirective } from 'ng-zorro-antd/dropdown';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { LandingHeaderComponent } from './components/landing-header/landing-header.component';
+import { LandingHeroComponent } from './components/landing-hero/landing-hero.component';
+import { LandingFeaturesComponent } from './components/landing-features/landing-features.component';
+import { LandingCtaComponent } from './components/landing-cta/landing-cta.component';
 import { map } from 'rxjs/operators';
 import { selectIsAuthenticated, selectUserFullName } from '../../store/auth/auth.selectors';
 import { selectIsCompleted } from '../../store/onboarding/onboarding.selectors';
@@ -22,15 +19,11 @@ import { NavigationUtils } from '../../core/utils/navigation.utils';
   selector: 'app-landing',
   standalone: true,
   imports: [
-    CommonModule, 
-    NzButtonModule, 
-    NzIconModule, 
-    NzAvatarModule, 
-    // NzDropdownMenuComponent, 
-    // NzDropdownDirective,
-    NzMenuModule,
-    NzDropDownModule,
-    AppLogoComponent,
+    CommonModule,
+    LandingHeaderComponent,
+    LandingHeroComponent,
+    LandingFeaturesComponent,
+    LandingCtaComponent,
     AppFooterComponent
   ],
   providers: [],

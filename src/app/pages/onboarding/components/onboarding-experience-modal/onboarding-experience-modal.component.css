@@ -1,0 +1,156 @@
+.experience-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .field-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+}
+
+.date-row {
+  margin-bottom: 0;
+}
+
+.checkbox-field {
+  margin: 0.5rem 0 1rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.field-checkbox {
+  margin: 0;
+  cursor: pointer;
+  accent-color: #43A047;
+  width: 18px;
+  height: 18px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--onboarding-muted);
+}
+
+.field-input,
+.field-textarea {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: var(--onboarding-surface);
+  border: 1px solid var(--onboarding-border);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--onboarding-text);
+  transition: all 0.2s;
+  outline: none;
+}
+
+.field-input:focus,
+.field-textarea:focus {
+  border-color: #43A047;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  background: var(--onboarding-card);
+}
+
+.field-input::placeholder,
+.field-textarea::placeholder {
+  color: var(--onboarding-muted);
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+.field-input.error,
+.field-textarea.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.field-input.error:focus,
+.field-textarea.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-message-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: #ef4444;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message-inline span[nz-icon] {
+  font-size: 1rem;
+}
+
+.field-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.char-count-small {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-left: auto;
+}
+
+:host-context(.dark) .field-input,
+:host-context(.dark) .field-textarea {
+  background: var(--onboarding-card);
+  border-color: var(--onboarding-border);
+  color: var(--onboarding-text);
+}
+
+:host-context(.dark) .field-input:focus,
+:host-context(.dark) .field-textarea:focus {
+  border-color: #43A047;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}

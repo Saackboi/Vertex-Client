@@ -1,0 +1,103 @@
+<div class="completed-container">
+  <div class="completed-hero">
+    <div class="hero-icon">
+      <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+    </div>
+    <div class="hero-text">
+      <h1 class="hero-title">¡Perfil Completado!</h1>
+      <p class="hero-description">
+        Tu perfil profesional está listo y visible para reclutadores.
+      </p>
+    </div>
+  </div>
+
+  <div class="profile-bento">
+    <div class="bento-card bento-summary">
+      <div class="bento-title">
+        <span nz-icon nzType="idcard" nzTheme="outline"></span>
+        Resumen profesional
+      </div>
+      <h3 class="bento-name">{{ accountForm.get('fullName')?.value || 'No especificado' }}</h3>
+      <p class="bento-text">
+        {{ accountForm.get('summary')?.value || 'No especificado' }}
+      </p>
+    </div>
+
+    <div class="bento-card bento-stats">
+      <div class="bento-title">
+        <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+        Estado del perfil
+      </div>
+      <div class="bento-stat-grid">
+        <div class="bento-stat">
+          <span class="stat-label">Experiencias</span>
+          <span class="stat-value">{{ experiences.length }}</span>
+        </div>
+        <div class="bento-stat">
+          <span class="stat-label">Habilidades</span>
+          <span class="stat-value">{{ skills.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bento-card bento-experience">
+      <div class="bento-title">
+        <span nz-icon nzType="solution" nzTheme="outline"></span>
+        Experiencia Laboral
+      </div>
+      @if (experiences.length > 0) {
+        <div class="bento-experience-list">
+          @for (exp of experiences.controls; track $index) {
+            <div class="bento-exp-item">
+              <div class="bento-exp-main">
+                <span class="bento-exp-role">{{ exp.get('jobTitle')?.value || 'Sin titulo' }}</span>
+                <span class="bento-exp-company">{{ exp.get('company')?.value || 'Sin empresa' }}</span>
+              </div>
+              <span class="bento-exp-date">
+                {{ exp.get('startDate')?.value || 'Inicio' }} -
+                {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fin') }}
+              </span>
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="bento-empty">No hay experiencias registradas.</p>
+      }
+    </div>
+
+    <div class="bento-card bento-skills">
+      <div class="bento-title">
+        <span nz-icon nzType="tags" nzTheme="outline"></span>
+        Habilidades
+      </div>
+      @if (skills && skills.length > 0) {
+        <div class="bento-skills-tags">
+          @for (skill of skills; track skill) {
+            <span class="bento-skill">{{ skill }}</span>
+          }
+        </div>
+      } @else {
+        <p class="bento-empty">Agrega habilidades para destacar tu perfil.</p>
+      }
+    </div>
+
+    <div class="bento-card bento-actions">
+      <div class="bento-title">
+        <span nz-icon nzType="home" nzTheme="outline"></span>
+        Acciones rápidas
+      </div>
+      <button nz-button nzType="primary" nzSize="large" (click)="navigateToDashboard.emit()">
+        Ir al inicio
+      </button>
+      <p class="bento-hint">Puedes volver a editar tu perfil cuando quieras.</p>
+    </div>
+
+    <div class="bento-card bento-info">
+      <div class="bento-title">
+        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+        Consejo
+      </div>
+      <p>¿Necesitas hacer cambios? Puedes editar tu perfil en cualquier momento desde la sección de <strong>Perfil</strong>.</p>
+    </div>
+  </div>
+</div>

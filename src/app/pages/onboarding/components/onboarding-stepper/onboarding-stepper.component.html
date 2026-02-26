@@ -1,0 +1,35 @@
+<div class="stepper-container">
+  <div class="stepper">
+    <div class="step-wrapper">
+      <div [class]="(currentStep$ | async)! > 0 ? 'step-circle completed' : ((currentStep$ | async)! === 0 ? 'step-circle active' : 'step-circle')">
+        @if ((currentStep$ | async)! > 0) {
+          <span nz-icon nzType="check" nzTheme="outline"></span>
+        } @else {
+          1
+        }
+      </div>
+      <span [class]="(currentStep$ | async)! > 0 ? 'step-label completed' : ((currentStep$ | async)! === 0 ? 'step-label active' : 'step-label')">Cuenta</span>
+    </div>
+
+    <div [class]="(currentStep$ | async)! > 0 ? 'step-line completed' : 'step-line'"></div>
+
+    <div class="step-wrapper">
+      <div [class]="(currentStep$ | async)! > 1 ? 'step-circle completed' : ((currentStep$ | async)! === 1 ? 'step-circle active' : 'step-circle')">
+        @if ((currentStep$ | async)! > 1) {
+          <span nz-icon nzType="check" nzTheme="outline"></span>
+        } @else {
+          2
+        }
+      </div>
+      <span [class]="(currentStep$ | async)! > 1 ? 'step-label completed' : ((currentStep$ | async)! === 1 ? 'step-label active' : 'step-label')">Experiencia</span>
+    </div>
+
+    <div [class]="(currentStep$ | async)! > 1 ? 'step-line completed' : 'step-line'"></div>
+
+    <div class="step-wrapper">
+      <div [class]="(currentStep$ | async)! === 2 ? 'step-circle active' : 'step-circle'">3</div>
+      <span [class]="(currentStep$ | async)! === 2 ? 'step-label active' : 'step-label'">Revisión</span>
+    </div>
+  </div>
+  <p class="step-indicator">Paso {{ (currentStep$ | async)! + 1 }} de 3</p>
+</div>

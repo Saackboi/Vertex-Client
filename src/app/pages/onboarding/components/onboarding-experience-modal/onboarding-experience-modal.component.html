@@ -1,0 +1,99 @@
+<nz-modal
+  [nzVisible]="isExperienceModalVisible"
+  nzTitle="Experiencia laboral"
+  (nzOnCancel)="closeExperienceModal.emit()"
+  [nzFooter]="experienceModalFooter">
+  <ng-container *nzModalContent>
+    @if (experienceModalForm) {
+      <form [formGroup]="experienceModalForm" class="experience-modal-form">
+        <div class="field-row">
+          <div class="form-field">
+            <label class="field-label">T?tulo del Puesto <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="jobTitle"
+              class="field-input"
+              [class.error]="hasError(experienceModalForm, 'jobTitle')"
+              placeholder="Ingeniero de Software Senior" />
+            @if (hasError(experienceModalForm, 'jobTitle')) {
+              <div class="error-message-inline">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(experienceModalForm, 'jobTitle') }}
+              </div>
+            }
+          </div>
+          <div class="form-field">
+            <label class="field-label">Empresa <span class="required">*</span></label>
+            <input
+              type="text"
+              formControlName="company"
+              class="field-input"
+              [class.error]="hasError(experienceModalForm, 'company')"
+              placeholder="Tech Solutions Inc." />
+            @if (hasError(experienceModalForm, 'company')) {
+              <div class="error-message-inline">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(experienceModalForm, 'company') }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="field-row date-row">
+          <div class="form-field">
+            <label class="field-label">Fecha de Inicio <span class="required">*</span></label>
+            <input
+              type="month"
+              formControlName="startDate"
+              class="field-input"
+              [class.error]="hasError(experienceModalForm, 'startDate')" />
+            @if (hasError(experienceModalForm, 'startDate')) {
+              <div class="error-message-inline">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(experienceModalForm, 'startDate') }}
+              </div>
+            }
+          </div>
+          <div class="form-field">
+            <label class="field-label">Fecha de Fin</label>
+            <input type="month" formControlName="endDate" class="field-input" />
+          </div>
+        </div>
+
+        <div class="checkbox-field">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isCurrent" class="field-checkbox" />
+            <span>Trabajo actual</span>
+          </label>
+        </div>
+
+        <div class="form-field">
+          <label class="field-label">Descripci?n <span class="required">*</span></label>
+          <textarea
+            formControlName="description"
+            class="field-textarea"
+            [class.error]="hasError(experienceModalForm, 'description')"
+            rows="3"
+            placeholder="Describe tus responsabilidades y logros..."></textarea>
+          <div class="field-footer">
+            @if (hasError(experienceModalForm, 'description')) {
+              <div class="error-message-inline">
+                <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+                {{ getErrorMessage(experienceModalForm, 'description') }}
+              </div>
+            }
+            <span class="char-count-small">
+              {{ experienceModalForm.get('description')?.value?.length || 0 }} / 500
+            </span>
+          </div>
+        </div>
+      </form>
+    }
+  </ng-container>
+</nz-modal>
+<ng-template #experienceModalFooter>
+  <button nz-button nzType="default" (click)="closeExperienceModal.emit()">Cancelar</button>
+  <button nz-button nzType="primary" (click)="saveExperienceModal.emit()" [disabled]="!experienceModalForm || experienceModalForm.invalid">
+    Guardar experiencia
+  </button>
+</ng-template>

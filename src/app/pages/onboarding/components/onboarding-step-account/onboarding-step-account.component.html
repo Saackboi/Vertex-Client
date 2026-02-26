@@ -1,0 +1,65 @@
+<div class="form-card">
+  <h2 class="form-title">Información Personal</h2>
+
+  <div class="form-alert">
+    <nz-alert
+      nzType="info"
+      nzMessage="Completa tu perfil profesional"
+      nzDescription="Esta información ayudará a los reclutadores a conocerte mejor. Sé claro y conciso."
+      nzShowIcon
+      nzCloseable
+    ></nz-alert>
+  </div>
+
+  <form [formGroup]="accountForm" class="account-form">
+    <div class="form-field">
+      <label for="fullName" class="field-label">Nombre de perfil</label>
+      <input
+        id="fullName"
+        type="text"
+        class="field-input disabled"
+        formControlName="fullName"
+        placeholder="Tu nombre"
+        readonly
+      />
+      <span class="field-hint">Este dato proviene de tu nombre de cuenta</span>
+    </div>
+
+    <div class="form-field">
+      <label for="summary" class="field-label">Resumen Profesional <span class="required">*</span></label>
+      <textarea
+        id="summary"
+        class="field-textarea"
+        [class.error]="hasError(accountForm, 'summary')"
+        formControlName="summary"
+        placeholder="Cuéntanos un poco sobre tu trayectoria y lo que buscas..."
+        rows="4"
+      ></textarea>
+      <div class="field-footer">
+        @if (hasError(accountForm, 'summary')) {
+          <div class="error-message">
+            <span nz-icon nzType="exclamation-circle" nzTheme="fill"></span>
+            {{ getErrorMessage(accountForm, 'summary') }}
+          </div>
+        }
+        <span class="char-count" [class.warning]="(accountForm.get('summary')?.value?.length || 0) < 10">
+          {{ accountForm.get('summary')?.value?.length || 0 }} / 500 caracteres
+          @if ((accountForm.get('summary')?.value?.length || 0) < 10) {
+            <span class="min-chars">(mínimo 10)</span>
+          }
+        </span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="submit-button"
+        (click)="saveAndContinue.emit()"
+        [disabled]="accountForm.invalid || isSummaryTooShort || (isLoading$ | async)">
+        Guardar y Siguiente
+        <span nz-icon nzType="arrow-right" nzTheme="outline"></span>
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,19 @@
+<div class="review-container">
+  <div class="review-grid">
+    <app-onboarding-review-cv
+      [accountForm]="accountForm"
+      [resumeData]="resumeData"
+      [skills]="skills"
+    />
+
+    <app-onboarding-review-summary
+      [accountForm]="accountForm"
+      [experiences]="experiences"
+      [skills]="skills"
+      [isLoading$]="isLoading$"
+      [canFinishOnboarding]="canFinishOnboarding"
+      (previousStep)="previousStep.emit()"
+      (finishOnboarding)="finishOnboarding.emit()"
+    />
+  </div>
+</div>

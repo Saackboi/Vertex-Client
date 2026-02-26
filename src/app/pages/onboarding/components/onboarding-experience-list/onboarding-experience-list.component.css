@@ -1,0 +1,137 @@
+.experience-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.experience-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--onboarding-card);
+  border: 1px solid var(--onboarding-border);
+  border-radius: 12px;
+  box-shadow: var(--onboarding-shadow);
+}
+
+.experience-row.incomplete {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: #fffbeb;
+}
+
+:host-context(.dark) .experience-row.incomplete {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.experience-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.experience-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--onboarding-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.exp-status {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.exp-status.pending {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.experience-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--onboarding-muted);
+}
+
+.experience-actions-compact {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.action-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-link.edit {
+  color: #43A047;
+}
+
+.action-link.edit:hover {
+  color: #2e7d32;
+  text-decoration: underline;
+}
+
+.action-link.delete {
+  color: #ef4444;
+}
+
+.action-link.delete:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+.experience-empty {
+  padding: 1.25rem;
+  background: var(--onboarding-surface);
+  border: 1px dashed var(--onboarding-border);
+  border-radius: 12px;
+  color: var(--onboarding-muted);
+  font-size: 0.9rem;
+}
+
+.add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: #f0fdf4;
+  color: #43A047;
+  border: 2px dashed #43A047;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2.5rem;
+}
+
+.add-button:hover {
+  background: #dcfce7;
+  border-color: #2e7d32;
+  color: #2e7d32;
+}

@@ -1,0 +1,35 @@
+<div class="skills-card">
+  <div class="skill-input-wrapper">
+    <span nz-icon nzType="search" nzTheme="outline" class="search-icon"></span>
+    <input
+      type="text"
+      class="skill-input"
+      placeholder="A?ade una habilidad y presiona Enter"
+      (keydown)="addSkill.emit()"
+    />
+  </div>
+
+  <div class="skills-list">
+    @for (skill of skills; track skill) {
+      <span class="skill-tag">
+        {{ skill }}
+        <button type="button" class="skill-remove" (click)="removeSkill.emit(skill)">
+          <span nz-icon nzType="close" nzTheme="outline"></span>
+        </button>
+      </span>
+    }
+  </div>
+</div>
+
+<div class="form-navigation">
+  <button type="button" class="nav-button secondary" (click)="previousStep.emit()">
+    Atr?s
+  </button>
+  <button
+    type="button"
+    class="nav-button primary"
+    (click)="saveAndContinue.emit()"
+    [disabled]="experienceForm.invalid || skills.length === 0 || (isLoading$ | async)">
+    Guardar y Siguiente
+  </button>
+</div>

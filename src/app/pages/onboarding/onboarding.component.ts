@@ -1,20 +1,14 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, firstValueFrom } from 'rxjs';
 import { debounceTime, map, take, takeUntil, startWith } from 'rxjs/operators';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzBadgeModule } from 'ng-zorro-antd/badge';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzDropdownMenuComponent, NzDropdownDirective } from 'ng-zorro-antd/dropdown';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NavigationUtils } from '../../core/utils/navigation.utils';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { OnboardingMapper } from './utils/onboarding.mapper';
 import { SaveProgressDto } from '../../models';
 import { noEmojiValidator } from '../../validators/no-emoji.validator';
@@ -32,25 +26,26 @@ import {
 import { FormUtils } from './helpers/form.utils';
 import { StepNumber } from './types/onboarding.types';
 import { selectUnreadCount } from '../../store/notifications/notifications.selectors';
-import { AppLogoComponent } from '../../components/app-logo.component';
 import { AppFooterComponent } from '../../components/app-footer.component';
+import { OnboardingHeaderComponent } from './components/onboarding-header/onboarding-header.component';
+import { OnboardingCompletedComponent } from './components/onboarding-completed/onboarding-completed.component';
+import { OnboardingStepperComponent } from './components/onboarding-stepper/onboarding-stepper.component';
+import { OnboardingStepAccountComponent } from './components/onboarding-step-account/onboarding-step-account.component';
+import { OnboardingStepExperienceComponent } from './components/onboarding-step-experience/onboarding-step-experience.component';
+import { OnboardingStepReviewComponent } from './components/onboarding-step-review/onboarding-step-review.component';
 
 @Component({
   selector: 'app-onboarding',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    NzIconModule,
-    NzButtonModule,
-    NzBadgeModule,
-    NzAvatarModule,
-    NzDropdownMenuComponent,
-    NzDropdownDirective,
-    NzMenuModule,
     NzAlertModule,
-    NzModalModule,
-    AppLogoComponent,
+    OnboardingHeaderComponent,
+    OnboardingCompletedComponent,
+    OnboardingStepperComponent,
+    OnboardingStepAccountComponent,
+    OnboardingStepExperienceComponent,
+    OnboardingStepReviewComponent,
     AppFooterComponent
   ],
   providers: [],

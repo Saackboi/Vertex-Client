@@ -1,0 +1,45 @@
+<div class="summary-sidebar">
+  <div class="summary-card">
+    <h3 class="summary-card-title">Información Personal</h3>
+    <div class="summary-card-content">
+      <div class="summary-item">
+        <span class="summary-label">Nombre:</span>
+        <span class="summary-value">{{ accountForm.get('fullName')?.value }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <h3 class="summary-card-title">Experiencia Laboral</h3>
+    <div class="summary-card-content">
+      @for (exp of experiences.controls; track $index; let i = $index) {
+        <div class="summary-exp-item" [class.last]="$index === experiences.controls.length - 1">
+          <p class="summary-exp-title">{{ exp.get('jobTitle')?.value }}</p>
+          <p class="summary-exp-company">{{ exp.get('company')?.value }}</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="summary-card">
+    <h3 class="summary-card-title">Habilidades</h3>
+    <div class="summary-skills">
+      @for (skill of skills; track skill) {
+        <span class="summary-skill-tag">{{ skill }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="review-actions">
+    <button type="button" class="nav-button secondary full-width" (click)="previousStep.emit()">
+      Atrás
+    </button>
+    <button
+      type="button"
+      class="nav-button primary full-width"
+      (click)="finishOnboarding.emit()"
+      [disabled]="!canFinishOnboarding || (isLoading$ | async)">
+      Finalizar y Enviar
+    </button>
+  </div>
+</div>

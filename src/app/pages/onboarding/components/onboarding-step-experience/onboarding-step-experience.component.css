@@ -1,0 +1,19 @@
+.step-container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+  .step-container {
+    padding: 0 0.75rem;
+  }
+}
+
+.step-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--onboarding-text);
+  margin: 0 0 1.5rem 0;
+}

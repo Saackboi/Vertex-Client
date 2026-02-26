@@ -6,13 +6,9 @@ import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { AppLogoComponent } from '../../components/app-logo.component';
 import { AppFooterComponent } from '../../components/app-footer.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
-import { NzBadgeModule } from 'ng-zorro-antd/badge';
-import { NzDropdownMenuComponent, NzDropdownDirective } from 'ng-zorro-antd/dropdown';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NotificationsHeaderComponent } from './components/notifications-header/notifications-header.component';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NavigationUtils } from '../../core/utils/navigation.utils';
 import { Notification } from '../../services/notification-hub.service';
@@ -30,12 +26,7 @@ import {
     CommonModule,
     NzIconModule,
     NzButtonModule,
-    NzAvatarModule,
-    NzBadgeModule,
-    NzDropdownMenuComponent,
-    NzDropdownDirective,
-    NzMenuModule,
-    AppLogoComponent,
+    NotificationsHeaderComponent,
     AppFooterComponent
   ],
   providers: [],

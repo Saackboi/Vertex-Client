@@ -1,0 +1,36 @@
+<div class="experience-list-compact">
+  @if (experiences.length === 0) {
+    <div class="experience-empty">
+      Aún no agregas experiencias. Usa el boton para crear una nueva.
+    </div>
+  }
+  @for (exp of experiences.controls; track $index; let i = $index) {
+    <div class="experience-row" [class.incomplete]="exp.invalid">
+      <div class="experience-main">
+        <div class="experience-title">
+          {{ exp.get('jobTitle')?.value || 'Sin titulo' }}
+          @if (exp.invalid) {
+            <span class="exp-status pending">Pendiente</span>
+          }
+        </div>
+        <div class="experience-meta">
+          <span>{{ exp.get('company')?.value || 'Sin empresa' }}</span>
+          <span>•</span>
+          <span>
+            {{ exp.get('startDate')?.value || 'Inicio' }} -
+            {{ exp.get('isCurrent')?.value ? 'Presente' : (exp.get('endDate')?.value || 'Fin') }}
+          </span>
+        </div>
+      </div>
+      <div class="experience-actions-compact">
+        <button type="button" class="action-link edit" (click)="openExperienceModal.emit(i)">Editar</button>
+        <button type="button" class="action-link delete" (click)="removeExperience.emit(i)">Eliminar</button>
+      </div>
+    </div>
+  }
+</div>
+
+<button type="button" class="add-button" (click)="addExperience.emit()">
+  <span nz-icon nzType="plus" nzTheme="outline"></span>
+  Agregar experiencia
+</button>

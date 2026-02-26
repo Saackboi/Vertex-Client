@@ -1,0 +1,35 @@
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-copy">
+      <h1 class="hero-title">
+        Impulsa tu Carrera con un Perfil Profesional Inteligente
+      </h1>
+      <p class="hero-subtitle">
+        Crea, gestiona y optimiza tu currículum y perfil profesional con herramientas inteligentes que te abren puertas.
+      </p>
+      <div class="hero-actions">
+        @if (isAuthenticated$ | async) {
+          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToOnboarding.emit()">
+            @if (isCompleted$ | async) {
+              Ver perfil
+            } @else {
+              @if (onboardingInProgress$ | async) {
+                Continuar creación de perfil
+              } @else {
+                Crear mi Perfil Gratis
+              }
+            }
+          </button>
+        } @else {
+          <button nz-button nzType="primary" nzSize="large" class="cta-primary" (click)="goToLogin.emit()">
+            Crear mi Perfil Gratis
+          </button>
+          <button nz-button nzType="default" nzSize="large" class="cta-secondary" (click)="goToLogin.emit()">
+            Iniciar Sesión
+          </button>
+        }
+      </div>
+    </div>
+    <app-landing-hero-preview />
+  </div>
+</section>

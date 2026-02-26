@@ -1,0 +1,44 @@
+<header class="notifications-header">
+  <div class="header-container">
+    <app-logo route="/dashboard" />
+
+    <div class="nav-section">
+      <nav class="nav-links">
+        <a (click)="navigateToProfile.emit()">Perfil</a>
+        <a class="active">Notificaciones</a>
+      </nav>
+
+      <div class="action-buttons">
+        <button class="icon-button" (click)="toggleDarkMode.emit()">
+          <span nz-icon [nzType]="isDarkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </button>
+        <button class="icon-button">
+          <nz-badge [nzCount]="(unreadCount$ | async) || 0">
+            <span nz-icon nzType="bell" nzTheme="outline"></span>
+          </nz-badge>
+        </button>
+        <nz-avatar
+          nz-dropdown
+          [nzDropdownMenu]="userMenu"
+          nzPlacement="bottomRight"
+          nzIcon="user"
+          [nzSize]="32"
+          class="user-avatar">
+        </nz-avatar>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item (click)="navigateToProfile.emit()">
+              <span nz-icon nzType="user" nzTheme="outline"></span>
+              Mi Perfil
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout.emit()">
+              <span nz-icon nzType="logout" nzTheme="outline"></span>
+              Cerrar Sesi?n
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+  </div>
+</header>
